@@ -84,12 +84,27 @@ sub processdir {
 
 # create picture gallery
 
+	my @piclist=();
+	my @infolist=();
+
 	my $haspics=0;
 	&iteratedir($D,$start,$dir,sub {
 		my ($start,$dir,$base)=@_;
 		my $en=sprintf("%s/%s/%s",$start,$dir,$base);
 		return unless ( -f $en );
-		$haspics=1 if (&processfile($start,$dir,$base,$en));
+		my $info = image_info($en);
+		if (my $error = $info->{error}) {
+			if (($error !~ "Unrecognized file format") &&
+			    ($error !~ "Can't read head")) {
+				print STDERR "File \"$en\": $error\n";
+			}
+			return;
+		}
+		if (&processfile($start,$dir,$base,$en,$info)) {
+			$haspics=1;
+			push(@piclist,$base);
+			push(@infolist,$info);
+		}
 	});
 
 # write HTML footer
@@ -101,6 +116,21 @@ sub processdir {
 
 	close(STDOUT);
 	closedir($D);
+
+# generate html files for slideshow from @piclist
+
+	for (my $i=0;$i<=$#piclist;$i++) {
+		my $base=$piclist[$i];
+		my $pbase;
+		my $nbase;
+		$pbase=$piclist[$i-1] if ($i>0);
+		$nbase=$piclist[$i+1] if ($i<$#piclist);
+		for my $refresh('static','slide') {
+			&mkauxfile($start,$dir,$pbase,$base,$nbase,
+					$refresh,$infolist[$i]);
+		}
+	}
+
 }
 
 #############################################################
@@ -174,16 +204,8 @@ sub subalbum {
 }
 
 sub processfile {
-	my ($start,$dir,$base,$fn)=@_;
+	my ($start,$dir,$base,$fn,$info)=@_;
 
-	my $info = image_info($fn);
-	if (my $error = $info->{error}) {
-		if (($error !~ "Unrecognized file format") &&
-		    ($error !~ "Can't read head")) {
-			print STDERR "File \"$fn\": $error\n";
-		}
-		return 0;
-	}
 	my ($w,$h) = dim($info);
 	my $title=$info->{'Comment'};
 	$title=$base unless ($title);
@@ -191,7 +213,7 @@ sub processfile {
 	my $medium=&scale($start,$dir,$base,$fn,640,$info);
 	print &infobox($info,$base,$fn),"\n";
 	print table({-class=>'slide'},Tr(td(
-		a({-href=>".info/$base.html",
+		a({-href=>".html/$base-info.html",
 			-onClick=>"return showIbox('$base');"},$title),
 		br,
 		a({-href=>$medium,-rel=>"lightbox",-title=>$title},
@@ -199,9 +221,6 @@ sub processfile {
 		br,
 		a({-href=>$base},"($w x $h)"),
 		br))),"\n";
-	#for my $k(keys %$info) {
-	#	print "\t$k:\t$info->{$k}<br>\n";
-	#}
 	return 1;
 }
 
@@ -235,6 +254,43 @@ sub infobox {
 	$msg.=end_table;
 	$msg.=end_div;
 	return $msg;
+}
+
+sub mkauxfile {
+	my ($start,$dir,$pbase,$base,$nbase,$refresh,$info) =@_;
+	my $en=sprintf("%s/%s/.html/%s-%s.html",$start,$dir,$base,$refresh);
+	my $pref;
+	my $nref;
+	if ($pbase) {
+		$pref=sprintf("%s-%s.html",$pbase,$refresh);
+	} else {
+		$pref="../";
+	}
+	if ($nbase) {
+		$nref=sprintf("%s-%s.html",$nbase,$refresh);
+	} else {
+		$nref="../";
+	}
+
+	my $tdir=sprintf "%s/%s/.html",$start,$dir;
+	mkdir($tdir,0755) unless ( -d $tdir );
+
+	unless (open(STDOUT,">".$en)) {
+		warn "cannot open $en: $!";
+		return;
+	}
+	my $title=$info->{'Comment'};
+	$title=$base unless ($title);
+	if ($refresh eq 'slide') {
+		print start_html(-title=>$title,
+			-head=>meta({-http_equiv=>'Refresh',
+				-content=>"3; url=$nref"})),"\n";
+	} else {
+		print start_html(-title=>$title),"\n";
+	}
+	print img({-src=>"../.640/".$base});
+	print end_html,"\n";
+	close(STDOUT);
 }
 
 sub scale {
