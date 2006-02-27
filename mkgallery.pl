@@ -87,7 +87,7 @@ sub processdir {
 			-script=>[{-code=>"var incPrefix='$inc';"},
 				{-src=>$inc."gallery.js"},
 				{-src=>$inc."lightbox.js"}]),"\n";
-	print a({-href=>"../"},"UP");
+	print a({-href=>"../index.html"},"UP");
 	print start_center,"\n";
 	print h1($title),"\n";
 
@@ -134,6 +134,7 @@ sub processdir {
 # write HTML footer
 
 	print br({-clear=>"all"}),"\n";
+	print a({-href=>".html/".$piclist[0]."-slide.html"},"Slideshow");
 	print hr,"\n" if ($haspics);
 	print end_center,"\n";
 	print end_html,"\n";
@@ -223,8 +224,8 @@ sub subalbum {
 	my ($base,$title)=@_;
 
 	print Tr({-bgcolor=>"#c0c0c0"},
-		td(a({-href=>$base."/"},$base)),
-		td(a({-href=>$base."/"},$title))),"\n";
+		td(a({-href=>$base."/index.html"},$base)),
+		td(a({-href=>$base."/index.html"},$title))),"\n";
 }
 
 sub processfile {
@@ -288,12 +289,21 @@ sub mkauxfile {
 	if ($pbase) {
 		$pref=sprintf("%s-%s.html",$pbase,$refresh);
 	} else {
-		$pref="../";
+		$pref="../index.html";
 	}
 	if ($nbase) {
 		$nref=sprintf("%s-%s.html",$nbase,$refresh);
 	} else {
-		$nref="../";
+		$nref="../index.html";
+	}
+	my $toggle;
+	my $toggleref;
+	if ($refresh eq 'slide') {
+		$toggle='Stop!';
+		$toggleref=sprintf("%s-static.html",$base);
+	} else {
+		$toggle='Play-&gt;';
+		$toggleref=sprintf("%s-slide.html",$base);
 	}
 
 	my $tdir=sprintf "%s/%s/.html",$start,$dir;
@@ -307,12 +317,22 @@ sub mkauxfile {
 	$title=$base unless ($title);
 	if ($refresh eq 'slide') {
 		print start_html(-title=>$title,
+				-bgcolor=>"#808080",
 			-head=>meta({-http_equiv=>'Refresh',
 				-content=>"3; url=$nref"})),"\n";
 	} else {
-		print start_html(-title=>$title),"\n";
+		print start_html(-title=>$title,
+				-bgcolor=>"#808080"),"\n";
 	}
-	print img({-src=>"../.640/".$base});
+	print start_center,"\n";
+	print h1($title);
+	print a({-href=>"../index.html"},"Index")," | ";
+	print a({-href=>$pref},"&lt;&lt;Prev")," | ";
+	print a({-href=>$toggleref},$toggle)," | ";
+	print a({-href=>$nref},"Next&gt;&gt;");
+	print p;
+	print img({-src=>"../.640/".$base}),"\n";
+	print end_center,"\n";
 	print end_html,"\n";
 	close(STDOUT);
 }
