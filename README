@@ -1,0 +1,64 @@
+  $Id$
+
+  README document for mkgallery script
+
+  Copyright (c) 2006 Eugene G. Crosser
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+
+mkgallery.pl traverses directory tree starting from current directory
+downwards, and in each directory creates index.html file with the list
+of subdirectories and the list of image files in the directory.
+Fielsystem objects starting with '.' are not processed.  For every directory,
+a file ".title" is checked, and created if absent, with the title for this
+album.  Two subdirectories are created with scaled down versions of the
+images: ".640" and ".160", and a direcotory named ".html" containging
+slideshow pages (and info pages for non-javascript clients).
+
+For the thing to work, you must create a subdirectory named ".include"
+at the root of your image gallery, or somewhere upstairs in the
+document tree, and put there files from the subdirectory "include" of
+this distribution.  Then, chdir to the root of your gallery and run
+"mkgallery.pl" script.  First time, you will be asked to enter titles
+for all subdirectories ("Albums"); if you wish to recreate the titles,
+remove ".title" files.  If you *don't* want "index.html" to be generated
+in some directory, create a file ".noindex".  This way you can preserve
+index created by hand or by some other script.
+
+"mkindex.pl" is a simple script that is completely unrelated to the
+gallery (theoretically).  If your tree starts with YYYY/DD (four
+digit year and two-digit month, this script will create a compact
+table with references to individual months, and then a separate list
+for subdirectories that are not four-digit.
+
+Requirements:
+Image::Info
+Image::Magick (might get rid of that later)
+Term::ReadLine (not at this moment but planned)
+
+Download:
+svn co svn://svn.average.org/mkgallery/trunk mkgallery
+
+TODO:
+- try to get get info from APP12 marker for non-EXIF files
+- really create info files
+- make slideshow "stylish", i.e. use CSS
+- make Image::Magick optional
+- make title editor based on Term::ReadLine
+- anything else that I forgot
+
+Eugene Crosser <crosser at average dot org>
