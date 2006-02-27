@@ -54,9 +54,11 @@ foreach my $yr(sort @years) {
 }
 print end_table,p,"\n";
 
+print start_table({-cellspacing=>3}),"\n";
 foreach my $sub(sort @subdirs) {
-	print td(a({-href=>$sub.'/'},$sub));
+	print Tr(td({-bgcolor=>"#ffffc0"},a({-href=>$sub.'/'},$sub)));
 }
+print end_table,"\n";
 
 print end_center,"\n";
 print end_html,"\n";
