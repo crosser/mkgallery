@@ -55,6 +55,7 @@ svn co svn://svn.average.org/mkgallery/trunk mkgallery
 
 TODO:
 - center info window relative to scroll position
+- tooltips for info and full image links
 - try to get get info from APP12 marker for non-EXIF files
 - really create info files
 - make slideshow "stylish", i.e. use CSS
