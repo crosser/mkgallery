@@ -69,7 +69,8 @@ foreach my $yr(sort @years) {
 	for (my $mo=1;$mo<=12;$mo++) {
 		my $dir=sprintf "%04d/%02d",$yr,$mo;
 		if (-d $dir) {
-			print td({-bgcolor=>"#ffffc0"},a({-href=>$dir.'/'},$mn[$mo]));
+			print td({-bgcolor=>"#ffffc0"},
+				a({-href=>$dir.'/index.html'},$mn[$mo]));
 		} else {
 			print td({-bgcolor=>"#c0c0c0"},$mn[$mo]);
 		}
@@ -80,7 +81,7 @@ print end_table,p,"\n";
 
 print start_table({-cellspacing=>3}),"\n";
 foreach my $sub(sort @subdirs) {
-	print Tr(td({-bgcolor=>"#ffffc0"},a({-href=>$sub.'/'},$sub)));
+	print Tr(td({-bgcolor=>"#ffffc0"},a({-href=>$sub.'/index.html'},$sub)));
 }
 print end_table,"\n";
 
