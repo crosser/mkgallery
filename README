@@ -54,6 +54,7 @@ Download:
 svn co svn://svn.average.org/mkgallery/trunk mkgallery
 
 TODO:
+- in slide show, use original image if it was not scaled down
 - center info window relative to scroll position
 - tooltips for info and full image links
 - try to get get info from APP12 marker for non-EXIF files
