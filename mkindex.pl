@@ -65,7 +65,8 @@ print h1("Gallery Index"),"\n";
 print start_table({-cellspacing=>3}),"\n";
 foreach my $yr(sort @years) {
 	print start_Tr,"\n";
-	print td({-bgcolor=>"#ffc0ff"},$yr);
+	print td({-bgcolor=>"#ffc0ff"},
+		a({-href=>$yr.'/index.html'},$yr));
 	for (my $mo=1;$mo<=12;$mo++) {
 		my $dir=sprintf "%04d/%02d",$yr,$mo;
 		if (-d $dir) {
