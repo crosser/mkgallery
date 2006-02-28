@@ -129,6 +129,7 @@ sub iterate {
 	undef @rdirlist; # inplace sorting would be handy here
 	my @imglist = sort {$a->{-base} cmp $b->{-base}} @rimglist;
 	undef @rimglist; # optimize away unsorted versions
+	$self->{-firstimg} = $imglist[0];
 
 	print "Dir: $self->{-fullpath}\n" if ($debug);
 
@@ -322,9 +323,19 @@ sub makeaux {
 	# slideshow
 	for my $refresh('static', 'slide') {
 		my $fn = sprintf("%s/.html/%s-%s.html",$dn,$name,$refresh);
-		my $bakref = sprintf("%s-%s.html",$pref,$refresh);
-		my $fwdref = sprintf("%s-%s.html",$nref,$refresh);
 		my $imgsrc = sprintf("../.%s/%s",$sizes[1],$name);
+		my $fwdref;
+		my $bakref;
+		if ($nref) {
+			$fwdref = sprintf("%s-%s.html",$nref,$refresh);
+		} else {
+			$fwdref = '../index.html';
+		}
+		if ($pref) {
+			$bakref = sprintf("%s-%s.html",$pref,$refresh);
+		} else {
+			$bakref = '../index.html';
+		}
 		my $toggleref;
 		my $toggletext;
 		if ($refresh eq 'slide') {
@@ -428,16 +439,35 @@ sub endsublist {
 sub startimglist {
 	my $self = shift;
 	my $IND = $self->{-IND};
+	my $first = $self->{-firstimg}->{-base};
+	my $slideref = sprintf(".html/%s-slide.html",$first);
 
-	print $IND h2("Images"),"\n";
+	print $IND h2("Images"),
+		a({-href=>$slideref},'Slideshow');
+		"\n";
 }
 
 sub img_entry {
 	my $self = shift;
 	my $IND = $self->{-parent}->{-IND};
 	my $name = $self->{-base};
+	my $title = $self->{-info}->{'Comment'};
+	$title = $name unless ($title);
+	my $thumb = $self->{$sizes[0]};
+	my $medium = $self->{$sizes[1]};
+	my $info = $self->{-info};
+	my ($w, $h) = dim($info);
 
-	print $IND a({-href=>$name},$name),"\n";
+	#print &infobox($info,$base,$fn),"\n";
+	print $IND table({-class=>'slide'},Tr(td(
+		a({-href=>".html/$name-info.html",
+			-onClick=>"return showIbox('$name');"},$title),
+		br,
+		a({-href=>$medium,-rel=>"lightbox",-title=>$title},
+			img({-src=>$thumb})),
+		br,
+		a({-href=>$name},"($w x $h)"),
+		br))),"\n";
 }
 
 sub endimglist {
