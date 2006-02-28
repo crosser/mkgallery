@@ -31,7 +31,11 @@ use Carp;
 use POSIX qw/getcwd/;
 use CGI qw/:html *table *center *div/;
 use Image::Info qw/image_info dim/;
+use Term::ReadLine;
+
 use Image::Magick;
+
+my $debug=0;
 
 ######################################################################
 
@@ -49,25 +53,56 @@ sub new {
 		$path .= '/' if ($path);
 		$path .= $name;
 		my $fullpath = $parent->{-fullpath}.'/'.$name;
-		$self = {-root=>$parent->{-root}, -path=>$path, -base=>$name,
-				-fullpath=>$fullpath};
+		$self = {
+				-parent=>$parent,
+				-root=>$parent->{-root},
+				-path=>$path,
+				-base=>$name,
+				-fullpath=>$fullpath,
+				-inc=>'../'.$parent->{-inc},
+			};
 	} else {
 		$class = $this;
 		my $root=shift;
-		$self = {-root=>$root, -fullpath=>$root};
+		$self = {
+				-root=>$root,
+				-fullpath=>$root,
+				-inc=>getinc($root),
+			};
 	}
 	bless $self, $class;
-	print "new $class: ($self->{-root}, $self->{-path}, $self->{-base}, $self->{-fullpath})\n";
+	if ($debug) {
+		print "new $class:\n";
+		foreach my $k(keys %$self) {
+			print "\t$k\t=\t$self->{$k}\n";
+		}
+	}
 	return $self;
+}
+
+sub getinc {
+	my $fullpath=shift;	# this is not a method
+	my $depth=20;		# arbitrary max depth
+
+	my $inc=".include";
+	while ( ! -d $fullpath."/".$inc ) {
+		$inc = "../".$inc;
+		last unless ($depth-- > 0);
+	}
+	if ($depth > 0) {
+		return $inc.'/';	# prefix with trailing slash
+	} else {
+		return 'NO-.INCLUDE-IN-PATH/'; # won't work anyway
+	}
 }
 
 sub iterate {
 	my $self = shift;
 	my $fullpath .= $self->{-fullpath};
-	print "iterate in dir $fullpath\n";
+	print "iterate in dir $fullpath\n" if ($debug);
 
-	my @rdirlist = ();
-	my @rimglist = ();
+	my @rdirlist;
+	my @rimglist;
 	my $D;
 	unless (opendir($D,$fullpath)) {
 		warn "cannot opendir $fullpath: $!";
@@ -88,13 +123,27 @@ sub iterate {
 	my @simglist = sort {$a->{-base} cmp $b->{-base}} @rimglist;
 	undef @rimglist; # optimize away unsorted versions
 
+# 1. first of all, fill title for this directory and create hidden subdirs
+
+	$self->initdir;
+
+# 2. iterate through subdirectories to get their titles filled
+
 	foreach my $dir(@sdirlist) {
-		print "Dir: $dir->{-fullpath}\n";
+		print "Dir: $dir->{-fullpath}\n" if ($debug);
 		$dir->iterate;
 	}
+
+# 3. start building directory index.html
+# 4. iterate through subdirectories to build subalbums list
+# 5. iterate through images to build cross-links
+
 	foreach my $img(@simglist) {
-		print "Img: $img->{-fullpath}\n";
+		print "Img: $img->{-fullpath}\n" if ($debug);
 	}
+
+# 6. iterate through images to build thumb list and aux html files
+
 }
 
 sub isdir {
@@ -114,8 +163,15 @@ sub isimg {
 		}
 		return 0;
 	}
+	$self->{-isimg} = 1;
 	$self->{-info} = $info;
 	return 1;
+}
+
+sub initdir {
+	my $self = shift;
+	my $fullpath = $self->{-fullpath};
+	# do stuff
 }
 
 ######################################################################
