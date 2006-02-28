@@ -24,6 +24,8 @@
 #     misrepresented as being the original software.
 #  3. This notice may not be removed or altered from any source distribution.
 
+package FsObj;
+
 use strict;
 use Carp;
 use POSIX qw/getcwd/;
@@ -31,12 +33,96 @@ use CGI qw/:html *table *center *div/;
 use Image::Info qw/image_info dim/;
 use Image::Magick;
 
-my $ask=1;
-my $startdir=getcwd;
-
 ######################################################################
 
-&processdir($startdir);
+FsObj->new(getcwd)->iterate;
+
+sub new {
+	my $this = shift;
+	my $class;
+	my $self;
+	if (ref($this)) {
+		$class = ref($this);
+		my $parent = $this;
+		my $path = $parent->{-path};
+		my $name = shift;
+		$path .= '/' if ($path);
+		$path .= $name;
+		my $fullpath = $parent->{-fullpath}.'/'.$name;
+		$self = {-root=>$parent->{-root}, -path=>$path, -base=>$name,
+				-fullpath=>$fullpath};
+	} else {
+		$class = $this;
+		my $root=shift;
+		$self = {-root=>$root, -fullpath=>$root};
+	}
+	bless $self, $class;
+	print "new $class: ($self->{-root}, $self->{-path}, $self->{-base}, $self->{-fullpath})\n";
+	return $self;
+}
+
+sub iterate {
+	my $self = shift;
+	my $fullpath .= $self->{-fullpath};
+	print "iterate in dir $fullpath\n";
+
+	my @rdirlist = ();
+	my @rimglist = ();
+	my $D;
+	unless (opendir($D,$fullpath)) {
+		warn "cannot opendir $fullpath: $!";
+		return;
+	}
+	while (my $de = readdir($D)) {
+		next if ($de =~ /^\./);
+		my $child = $self->new($de);
+		if ($child->isdir) {
+			push(@rdirlist,$child);
+		} elsif ($child->isimg) {
+			push(@rimglist,$child);
+		}
+	}
+	closedir($D);
+	my @sdirlist = sort {$a->{-base} cmp $b->{-base}} @rdirlist;
+	undef @rdirlist; # inplace sorting would be handy here
+	my @simglist = sort {$a->{-base} cmp $b->{-base}} @rimglist;
+	undef @rimglist; # optimize away unsorted versions
+
+	foreach my $dir(@sdirlist) {
+		print "Dir: $dir->{-fullpath}\n";
+		$dir->iterate;
+	}
+	foreach my $img(@simglist) {
+		print "Img: $img->{-fullpath}\n";
+	}
+}
+
+sub isdir {
+	my $self = shift;
+	return ( -d $self->{-fullpath} );
+}
+
+sub isimg {
+	my $self = shift;
+	my $fullpath = $self->{-fullpath};
+	return 0 unless ( -f $fullpath );
+	my $info = image_info($fullpath);
+	if (my $error = $info->{error}) {
+		if (($error !~ "Unrecognized file format") &&
+		    ($error !~ "Can't read head")) {
+			warn "File \"$fullpath\": $error\n";
+		}
+		return 0;
+	}
+	$self->{-info} = $info;
+	return 1;
+}
+
+######################################################################
+=cut
+######################################################################
+
+&processdir(getcwd);
 
 sub processdir {
 	my ($start,$dir)=@_;
