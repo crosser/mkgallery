@@ -144,25 +144,35 @@ sub iterate {
 	}
 
 # 3. iterate through images to build cross-links,
-#    create scaled versions and aux htmls
 
 	my $previmg = undef;
 	foreach my $img(@imglist) {
+		# list-linking must be done before generating
+		# aux html because aux pages rely on prev/next refs
 		if ($previmg) {
 			$previmg->{-nextimg} = $img;
 			$img->{-previmg} = $previmg;
 		}
 		$previmg=$img;
+	}
 
+# 4. create scaled versions and aux html pages
+
+	foreach my $img(@imglist) {
+		# scaled versions must be generated before aux html
+		# and main image index because they both rely on
+		# refs to scaled images and they may be just original
+		# images, this is not known before we try scaling.
 		$img->makescaled;
+		# finally, make aux html pages
 		$img->makeaux;
 	}
 
-# 4. start building index.html for the directory
+# 5. start building index.html for the directory
 
 	$self->startindex;
 
-# 5. iterate through subdirectories to build subalbums list
+# 6. iterate through subdirectories to build subalbums list
 
 	if (@dirlist) {
 		$self->startsublist;
@@ -172,7 +182,7 @@ sub iterate {
 		$self->endsublist;
 	}
 
-# 6. iterate through images to build thumb list
+# 7. iterate through images to build thumb list
 
 	if (@imglist) {
 		$self->startimglist;
@@ -183,7 +193,7 @@ sub iterate {
 		$self->endimglist;
 	}
 
-# 7. comlplete building index.html for the directory
+# 8. comlplete building index.html for the directory
 
 	$self->endindex;
 }
@@ -258,16 +268,103 @@ sub makescaled {
 	my $max = ($w > $h)?$w:$h;
 
 	foreach my $size(@sizes) {
-		my $nfn = $dn.'/.'.$size.'/'.$name;
+		my $nref = '.'.$size.'/'.$name;
+		my $nfn = $dn.'/'.$nref;
 		my $factor=$size/$max;
+		if ($factor >= 1) {
+			$self->{$size} = $name;	# unscaled version will do
+		} else {
+			$self->{$size} = $nref;
+			if (isnewer($fn,$nfn)) {
+				doscaling($fn,$nfn,$factor,$w,$h);
+			}
+		}
 	}
+}
+
+sub isnewer {
+	my ($fn1,$fn2) = @_;			# this is not a method
+	my @stat1=stat($fn1);
+	my @stat2=stat($fn2);
+	return (!@stat2 || ($stat1[9] > $stat2[9]));
+	# true if $fn2 is absent or is older than $fn1
+}
+
+sub doscaling {
+	my ($src,$dest,$factor,$w,$h) = @_;	# this is not a method
+	my $im = new Image::Magick;
+	my $err;
+	print "doscaling $src -> $dest by $factor\n" if ($debug);
+	$err = $im->Read($src);
+	unless ($err) {
+		$im->Scale(width=>$w*$factor,height=>$h*$factor);
+		$err=$im->Write($dest);
+		warn "ImageMagick: write \"$dest\": $err" if ($err);
+	} else {	# fallback to command-line tools
+		warn "ImageMagick: read \"$src\": $err";
+		system("djpeg \"$src\" | pnmscale \"$factor\" | cjpeg >\"$dest\"");
+	}
+	undef $im;
 }
 
 sub makeaux {
 	my $self = shift;
-	my $fn = $self->{-fullpath};
 	my $name = $self->{-base};
 	my $dn = $self->{-parent}->{-fullpath};
+	my $pref = $self->{-previmg}->{-base};
+	my $nref = $self->{-nextimg}->{-base};
+	my $inc = $self->{-inc};
+	my $title = $self->{-info}->{'Comment'};
+	$title = $name unless ($title);
+
+	print "slide: \"$pref\"->\"$name\"->\"$nref\"\n" if ($debug);
+
+	# slideshow
+	for my $refresh('static', 'slide') {
+		my $fn = sprintf("%s/.html/%s-%s.html",$dn,$name,$refresh);
+		my $bakref = sprintf("%s-%s.html",$pref,$refresh);
+		my $fwdref = sprintf("%s-%s.html",$nref,$refresh);
+		my $imgsrc = sprintf("../.%s/%s",$sizes[1],$name);
+		my $toggleref;
+		my $toggletext;
+		if ($refresh eq 'slide') {
+			$toggleref=sprintf("%s-static.html",$name);
+			$toggletext = 'Stop!';
+		} else {
+			$toggleref=sprintf("%s-slide.html",$name);
+			$toggletext = 'Play-&gt;';
+		}
+		my $F;
+		unless (open($F,'>'.$fn)) {
+			warn "cannot open \"$fn\": $!";
+			next;
+		}
+		if ($refresh eq 'slide') {
+			print $F start_html(-title=>$title,
+					-bgcolor=>"#808080",
+					-head=>meta({-http_equiv=>'Refresh',
+						-content=>"3; url=$fwdref"}),
+					-style=>{-src=>$inc."gallery.css"},
+				),"\n";
+					
+		} else {
+			print $F start_html(-title=>$title,
+					-bgcolor=>"#808080",
+					-style=>{-src=>$inc."gallery.css"},
+				),"\n";
+		}
+		print $F start_center,"\n",
+			h1($title),
+			a({-href=>"../index.html"},"Index")," | ",
+			a({-href=>$bakref},"&lt;&lt;Prev")," | ",
+			a({-href=>$toggleref},$toggletext)," | ",
+			a({-href=>$fwdref},"Next&gt;&gt;"),
+			p,
+			img({-src=>$imgsrc}),"\n",
+			end_center,"\n",
+			end_html,"\n";
+		close($F);
+	}
 }
 
 sub startindex {
