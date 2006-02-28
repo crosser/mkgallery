@@ -130,29 +130,62 @@ sub iterate {
 	my @imglist = sort {$a->{-base} cmp $b->{-base}} @rimglist;
 	undef @rimglist; # optimize away unsorted versions
 
+	print "Dir: $self->{-fullpath}\n" if ($debug);
+
 # 1. first of all, fill title for this directory and create hidden subdirs
 
 	$self->initdir;
 
-# 2. iterate through subdirectories to get their titles filled
+# 2. recurse into subdirectories to get their titles filled
 #    before we start writing out subalbum list
 
 	foreach my $dir(@dirlist) {
-		print "Dir: $dir->{-fullpath}\n" if ($debug);
 		$dir->iterate;
 	}
 
-# 3. start building index.html for the directory
-# 4. iterate through subdirectories to build subalbums list
-# 5. iterate through images to build cross-links
+# 3. iterate through images to build cross-links,
+#    create scaled versions and aux htmls
 
+	my $previmg = undef;
 	foreach my $img(@imglist) {
-		print "Img: $img->{-fullpath}\n" if ($debug);
+		if ($previmg) {
+			$previmg->{-nextimg} = $img;
+			$img->{-previmg} = $previmg;
+		}
+		$previmg=$img;
+
+		$img->makescaled;
+		$img->makeaux;
 	}
 
-# 6. iterate through images to build thumb list and aux html files
+# 4. start building index.html for the directory
+
+	$self->startindex;
+
+# 5. iterate through subdirectories to build subalbums list
+
+	if (@dirlist) {
+		$self->startsublist;
+		foreach my $dir(@dirlist) {
+			$dir->sub_entry;
+		}
+		$self->endsublist;
+	}
+
+# 6. iterate through images to build thumb list
+
+	if (@imglist) {
+		$self->startimglist;
+		foreach my $img(@imglist) {
+			print "Img: $img->{-fullpath}\n" if ($debug);
+			$img->img_entry;
+		}
+		$self->endimglist;
+	}
+
 # 7. comlplete building index.html for the directory
 
+	$self->endindex;
 }
 
 sub isdir {
@@ -210,10 +243,111 @@ sub edittitle {
 		}
 	}
 	unless ($title) {
-		$title=substr($fullpath,length($self->{-root}))
+		$title=substr($fullpath,length($self->{-root}));
 	}
 	$self->{-title}=$title;
 	print "title in $fullpath is $title\n" if ($debug);
+}
+
+sub makescaled {
+	my $self = shift;
+	my $fn = $self->{-fullpath};
+	my $name = $self->{-base};
+	my $dn = $self->{-parent}->{-fullpath};
+	my ($w, $h) = dim($self->{-info});
+	my $max = ($w > $h)?$w:$h;
+
+	foreach my $size(@sizes) {
+		my $nfn = $dn.'/.'.$size.'/'.$name;
+		my $factor=$size/$max;
+	}
+}
+
+sub makeaux {
+	my $self = shift;
+	my $fn = $self->{-fullpath};
+	my $name = $self->{-base};
+	my $dn = $self->{-parent}->{-fullpath};
+}
+
+sub startindex {
+	my $self = shift;
+	my $fn = $self->{-fullpath}.'/index.html';
+	my $IND;
+	unless (open($IND,'>'.$fn)) {
+		warn "cannot open $fn: $!";
+		return;
+	}
+	$self->{-IND} = $IND;
+
+	my $inc = $self->{-inc};
+	my $title = $self->{-title};
+	print $IND start_html(-title => $title,
+			-style=>{-src=>[$inc."gallery.css",
+					$inc."lightbox.css"]},
+			-script=>[{-code=>"var incPrefix='$inc';"},
+				{-src=>$inc."gallery.js"},
+				{-src=>$inc."lightbox.js"}]),
+		a({-href=>"../index.html"},"UP"),"\n",
+		start_center,"\n",
+		h1($title),"\n",
+		"\n";
+}
+
+sub endindex {
+	my $self = shift;
+	my $IND = $self->{-IND};
+
+	print $IND end_center,end_html,"\n";
+
+	close($IND) if ($IND);
+	undef $self->{-IND};
+}
+
+sub startsublist {
+	my $self = shift;
+	my $IND = $self->{-IND};
+
+	print $IND h2("Albums"),"\n",start_table,"\n";
+}
+
+sub sub_entry {
+	my $self = shift;
+	my $IND = $self->{-parent}->{-IND};
+	my $name = $self->{-base};
+	my $title = $self->{-title};
+
+	print $IND Tr(td(a({-href=>$name.'/index.html'},$name)),
+			td(a({-href=>$name.'/index.html'},$title))),"\n";
+}
+
+sub endsublist {
+	my $self = shift;
+	my $IND = $self->{-IND};
+
+	print $IND end_table,"\n",br({-clear=>'all'}),hr,"\n\n";
+}
+
+sub startimglist {
+	my $self = shift;
+	my $IND = $self->{-IND};
+
+	print $IND h2("Images"),"\n";
+}
+
+sub img_entry {
+	my $self = shift;
+	my $IND = $self->{-parent}->{-IND};
+	my $name = $self->{-base};
+
+	print $IND a({-href=>$name},$name),"\n";
+}
+
+sub endimglist {
+	my $self = shift;
+	my $IND = $self->{-IND};
+
+	print $IND br({-clear=>'all'}),hr,"\n\n";
 }
 
 ######################################################################
@@ -265,7 +399,6 @@ sub processdir {
 
 # write HTML header
 
-	print start_html(-title => $title,
 			-style=>{-src=>[$inc."gallery.css",
 					$inc."lightbox.css"]},
 			-script=>[{-code=>"var incPrefix='$inc';"},
