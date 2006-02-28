@@ -32,12 +32,23 @@ use POSIX qw/getcwd/;
 use CGI qw/:html *table *center *div/;
 use Image::Info qw/image_info dim/;
 use Term::ReadLine;
+use Getopt::Long;
 
 use Image::Magick;
 
-my $debug=0;
+my @sizes = (160, 640);
 
 ######################################################################
+
+my $debug = 0;
+my $asktitle = 0;
+my $noasktitle = 0;
+
+GetOptions('asktitle'=>\$asktitle,
+		'noasktitle'=>\$noasktitle,
+		'debug'=>\$debug);
+
+my $term = new Term::ReadLine "Edit Title";
 
 FsObj->new(getcwd)->iterate;
 
@@ -48,15 +59,11 @@ sub new {
 	if (ref($this)) {
 		$class = ref($this);
 		my $parent = $this;
-		my $path = $parent->{-path};
 		my $name = shift;
-		$path .= '/' if ($path);
-		$path .= $name;
 		my $fullpath = $parent->{-fullpath}.'/'.$name;
 		$self = {
 				-parent=>$parent,
 				-root=>$parent->{-root},
-				-path=>$path,
 				-base=>$name,
 				-fullpath=>$fullpath,
 				-inc=>'../'.$parent->{-inc},
@@ -90,9 +97,9 @@ sub getinc {
 		last unless ($depth-- > 0);
 	}
 	if ($depth > 0) {
-		return $inc.'/';	# prefix with trailing slash
+		return $inc.'/';		# prefix with trailing slash
 	} else {
-		return 'NO-.INCLUDE-IN-PATH/'; # won't work anyway
+		return 'NO-.INCLUDE-IN-PATH/';	# won't work anyway
 	}
 }
 
@@ -118,9 +125,9 @@ sub iterate {
 		}
 	}
 	closedir($D);
-	my @sdirlist = sort {$a->{-base} cmp $b->{-base}} @rdirlist;
+	my @dirlist = sort {$a->{-base} cmp $b->{-base}} @rdirlist;
 	undef @rdirlist; # inplace sorting would be handy here
-	my @simglist = sort {$a->{-base} cmp $b->{-base}} @rimglist;
+	my @imglist = sort {$a->{-base} cmp $b->{-base}} @rimglist;
 	undef @rimglist; # optimize away unsorted versions
 
 # 1. first of all, fill title for this directory and create hidden subdirs
@@ -128,21 +135,23 @@ sub iterate {
 	$self->initdir;
 
 # 2. iterate through subdirectories to get their titles filled
+#    before we start writing out subalbum list
 
-	foreach my $dir(@sdirlist) {
+	foreach my $dir(@dirlist) {
 		print "Dir: $dir->{-fullpath}\n" if ($debug);
 		$dir->iterate;
 	}
 
-# 3. start building directory index.html
+# 3. start building index.html for the directory
 # 4. iterate through subdirectories to build subalbums list
 # 5. iterate through images to build cross-links
 
-	foreach my $img(@simglist) {
+	foreach my $img(@imglist) {
 		print "Img: $img->{-fullpath}\n" if ($debug);
 	}
 
 # 6. iterate through images to build thumb list and aux html files
+# 7. comlplete building index.html for the directory
 
 }
 
@@ -171,7 +180,40 @@ sub isimg {
 sub initdir {
 	my $self = shift;
 	my $fullpath = $self->{-fullpath};
-	# do stuff
+	for my $subdir(@sizes, 'html') {
+		my $tdir=sprintf "%s/.%s",$self->{-fullpath},$subdir;
+		mkdir($tdir,0755) unless ( -d $tdir );
+	}
+	$self->edittitle;
+}
+
+sub edittitle {
+	my $self = shift;
+	my $fullpath = $self->{-fullpath};
+	my $title;
+	my $T;
+	if (open($T,'<'.$fullpath.'/.title')) {
+		$title = <$T>;
+		$title =~ s/[\r\n]*$//;
+		close($T);
+	}
+	if ($asktitle || (!$title && !$noasktitle)) {
+		my $prompt = $self->{-base};
+		$prompt = '/' unless ($prompt);
+		my $OUT = $term->OUT || \*STDOUT;
+		print $OUT "Enter title for $fullpath\n";
+		$title = $term->readline($prompt.' >',$title);
+		$term->addhistory($title) if ($title);
+		if (open($T,'>'.$fullpath.'/.title')) {
+			print $T $title,"\n";
+			close($T);
+		}
+	}
+	unless ($title) {
+		$title=substr($fullpath,length($self->{-root}))
+	}
+	$self->{-title}=$title;
+	print "title in $fullpath is $title\n" if ($debug);
 }
 
 ######################################################################
