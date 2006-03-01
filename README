@@ -54,14 +54,11 @@ Download:
 svn co svn://svn.average.org/mkgallery/trunk mkgallery
 
 TODO:
-- in slide show, use original image if it was not scaled down
 - center info window relative to scroll position
 - tooltips for info and full image links
 - try to get get info from APP12 marker for non-EXIF files
-- really create info files
 - make slideshow "stylish", i.e. use CSS
 - make Image::Magick optional
-- make title editor based on Term::ReadLine
 - anything else that I forgot
 
 Eugene Crosser <crosser at average dot org>
