@@ -31,13 +31,13 @@ div.ibox {
  border: 1px solid black;
  margin: 0px;
  padding: 0px;
+ font-size: 10px;
  display: none;
  z-index: 1000;
  position: absolute;
 }
 div.iboxtitle {
  background-color: blue;
- border: 1px solid black;
  margin: 0px;
  padding: 0.5ex;
 }
