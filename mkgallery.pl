@@ -28,7 +28,7 @@ package FsObj;
 
 use strict;
 use Carp;
-use POSIX qw/getcwd/;
+use POSIX qw/getcwd strftime/;
 use CGI qw/:html *table *Tr *center *div/;
 use Image::Info qw/image_info dim/;
 use Term::ReadLine;
@@ -216,9 +216,47 @@ sub isimg {
 		}
 		return 0;
 	}
+
+	tryapp12($info) unless ($info->{'ExifVersion'});
+
 	$self->{-isimg} = 1;
 	$self->{-info} = $info;
 	return 1;
+}
+
+sub tryapp12 {
+	my $info = shift;	# this is not a method
+	my $app12;
+	# dirty hack to take care of Image::Info parser strangeness
+	foreach my $k(keys %$info) {
+		$app12=substr($k,6).$info->{$k} if ($k =~ /^App12-/);
+	}
+	return unless ($app12);	# bad luck
+	my $seenfirstline=0;
+	foreach my $ln(split /[\r\n]+/,$app12) {
+		$ln =~ s/[[:^print:]\000]/ /g;
+		unless ($seenfirstline) {
+			$seenfirstline=1;
+			$info->{'Make'}=$ln;
+			next;
+		}
+		my ($k,$v)=split /=/,$ln,2;
+		if ($k eq 'TimeDate') {
+			$info->{'DateTime'} =
+				strftime("%Y:%m:%d %H:%M:%S", localtime($v))
+							unless ($v < 0);
+		} elsif ($k eq 'Shutter') {
+			$info->{'ExposureTime'} = '1/'.int(1000000/$v+.5);
+		} elsif ($k eq 'Flash') {
+			$info->{'Flash'} = $v?'Flash fired':'Flash did not fire';
+		} elsif ($k eq 'Type') {
+			$info->{'Model'} = $v;
+		} elsif ($k eq 'Version') {
+			$info->{'Software'} = $v;
+		} elsif ($k eq 'Fnumber') {
+			$info->{'FNumber'} = $v;
+		}
+	}
 }
 
 sub initdir {

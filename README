@@ -54,9 +54,7 @@ Download:
 svn co svn://svn.average.org/mkgallery/trunk mkgallery
 
 TODO:
-- center info window relative to scroll position
 - tooltips for info and full image links
-- try to get info from APP12 marker for non-EXIF files
 - make Image::Magick optional
 - anything else that I forgot
 
