@@ -1,31 +1,68 @@
 img {
  clear:both;
- border: 1px solid green;
+ border-style: inset;
+ border-color: gray;
+ border-width: 2px;
+ margin: 0.3ex;
 }
+
 table.slide {
  float: left;
  width: 210px;
  height: 210px;
  margin: 0.3ex;
- border: 1px solid black;
+ border-style: outset;
+ border-color: #e0c080;
+ border-width: 2px;
  background-color: #e0c080;
  text-align: center;
  font-size: 10px
 }
-tr {
+table.slide tr {
  margin: 0px;
 }
-td {
+table.slide td {
  margin: 0px;
  vertical-align: middle;
 }
+
 div.ibox {
  background-color: #ffffc0;
  border: 1px solid black;
- text-align: left;
- position: absolute;
  margin: 0px;
- padding: 1ex;
+ padding: 0px;
  display: none;
  z-index: 1000;
+ position: absolute;
+}
+div.iboxtitle {
+ background-color: blue;
+ border: 1px solid black;
+ margin: 0px;
+ padding: 0.5ex;
+}
+div.iboxtitle * {
+ color: white;
+}
+
+table.ipage {
+ background-color: #ffffc0;
+ border: 1px solid black;
+ border-collapse: collapse;
+ text-align: left;
+ margin: 0px;
+ padding: 0px;
+}
+table.ipage td {
+ border: 1px solid black;
+ margin: 0px;
+ padding: 1ex;
+}
+
+table.infotable {
+ border-width: 0px;
+}
+table.infotable td {
+ border-width: 0px;
+ padding: 0.3ex;
 }

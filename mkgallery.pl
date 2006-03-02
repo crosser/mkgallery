@@ -385,12 +385,12 @@ sub makeaux {
 
 	# info html
 	my $imgsrc = sprintf("../.%s/%s",$sizes[0],$name);
-	print $F start_html(-title=>$title,-bgcolor=>"#ffff80",
+	print $F start_html(-title=>$title,
 				-style=>{-src=>$inc."gallery.css"},),"\n",
 		start_center,"\n",
 		h1($title),"\n",
-		table(Tr(td(img({-src=>$imgsrc})),td($self->infotable))),
-		end_table,
+		table({-class=>'ipage'},Tr(td(img({-src=>$imgsrc})),td($self->infotable))),
+		a({-href=>'../index.html'},'Index'),"\n",
 		end_center,"\n",
 		end_html,"\n";
 	close($F);
@@ -477,11 +477,13 @@ sub img_entry {
 	my ($w, $h) = dim($info);
 
 	print $IND start_div({-class=>'ibox',-id=>$name,
-					-OnClick=>"HideIbox('$name');"}),
+				-OnClick=>"HideIbox('$name');"}),"\n",
+		start_div({-class=>'iboxtitle'}),
 		span({-style=>'float: left;'},b("Info for $name")),
 		span({-style=>'float: right;'},
 			a({-href=>"#",-OnClick=>"HideIbox('$name');"},"Close")),
-		br({-clear=>'all'}),
+		br({-clear=>'all'}),"\n",
+		end_div,"\n",
 		$self->infotable,
 		end_div,"\n";
 
@@ -522,7 +524,7 @@ sub infotable {
 		'Model',
 		'Software',
 	);
-	$msg.=start_table."\n";
+	$msg.=start_table({-class=>'infotable'})."\n";
 	foreach my $k(@infokeys) {
 		$msg.=Tr(td($k.":"),td($info->{$k}))."\n" if ($info->{$k});
 	}
