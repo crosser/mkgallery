@@ -3,14 +3,14 @@ img {
  border-style: inset;
  border-color: gray;
  border-width: 2px;
- margin: 0.3ex;
+ margin: 0.2ex;
 }
 
 table.slide {
  float: left;
  width: 210px;
  height: 210px;
- margin: 0.3ex;
+ margin: 0.2ex;
  border-style: outset;
  border-color: #e0c080;
  border-width: 2px;
