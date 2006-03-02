@@ -66,3 +66,23 @@ table.infotable td {
  border-width: 0px;
  padding: 0.3ex;
 }
+
+table.navi {
+ background-color: #c0c0c0;
+ border: 1px solid black;
+ border-collapse: collapse;
+ text-align: center;
+ margin: 0px;
+ padding: 0px;
+}
+table.navi td {
+ border: 1px solid black;
+ margin: 0px;
+ padding: 1ex;
+}
+
+table.picframe {
+ border: 1px solid black;
+ margin: 10px;
+ padding: 10px;
+}

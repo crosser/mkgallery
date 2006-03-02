@@ -29,7 +29,7 @@ package FsObj;
 use strict;
 use Carp;
 use POSIX qw/getcwd/;
-use CGI qw/:html *table *center *div/;
+use CGI qw/:html *table *Tr *center *div/;
 use Image::Info qw/image_info dim/;
 use Term::ReadLine;
 use Getopt::Long;
@@ -323,7 +323,7 @@ sub makeaux {
 	# slideshow
 	for my $refresh('static', 'slide') {
 		my $fn = sprintf("%s/.html/%s-%s.html",$dn,$name,$refresh);
-		my $imgsrc = sprintf("../.%s/%s",$sizes[1],$name);
+		my $imgsrc = '../'.$self->{$sizes[1]};
 		my $fwdref;
 		my $bakref;
 		if ($nref) {
@@ -365,13 +365,16 @@ sub makeaux {
 				),"\n";
 		}
 		print $F start_center,"\n",
-			h1($title),
-			a({-href=>"../index.html"},"Index")," | ",
-			a({-href=>$bakref},"&lt;&lt;Prev")," | ",
-			a({-href=>$toggleref},$toggletext)," | ",
-			a({-href=>$fwdref},"Next&gt;&gt;"),
-			p,
-			img({-src=>$imgsrc}),"\n",
+			h1($title),"\n",
+			start_table({-class=>'navi'}),start_Tr,"\n",
+			td(a({-href=>"../index.html"},"Index")),"\n",
+			td(a({-href=>$bakref},"&lt;&lt;Prev")),"\n",
+			td(a({-href=>$toggleref},$toggletext)),"\n",
+			td(a({-href=>$fwdref},"Next&gt;&gt;")),"\n",
+			end_Tr,
+			end_table,"\n",
+			table({-class=>'picframe'},
+				Tr(td(img({-src=>$imgsrc})))),"\n",
 			end_center,"\n",
 			end_html,"\n";
 		close($F);
