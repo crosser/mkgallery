@@ -440,6 +440,8 @@ sub makeaux {
 sub startindex {
 	my $self = shift;
 	my $fn = $self->{-fullpath}.'/index.html';
+	my $block = $self->{-fullpath}.'/.noindex';
+	$fn = '/dev/null' if ( -f $block );
 	my $IND;
 	unless (open($IND,'>'.$fn)) {
 		warn "cannot open $fn: $!";
