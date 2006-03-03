@@ -529,13 +529,13 @@ sub img_entry {
 		end_div,"\n";
 
 	print $IND table({-class=>'slide'},Tr(td(
-		a({-href=>".html/$name-info.html",
+		a({-href=>".html/$name-info.html",-title=>'Image Info',
 			-onClick=>"return showIbox('$name');"},$title),
 		br,
 		a({-href=>$medium,-rel=>"lightbox",-title=>$title},
 			img({-src=>$thumb})),
 		br,
-		a({-href=>$name},"($w x $h)"),
+		a({-href=>$name,-title=>'Original Image'},"($w x $h)"),
 		br))),"\n";
 }
 
