@@ -54,7 +54,7 @@ Download:
 svn co svn://svn.average.org/mkgallery/trunk mkgallery
 
 TODO:
-- tooltips for info and full image links
+- build html and indices only if image/directory changed
 - make Image::Magick optional
 - anything else that I forgot
 
