@@ -108,6 +108,7 @@ sub iterate {
 	my $fullpath .= $self->{-fullpath};
 	print "iterate in dir $fullpath\n" if ($debug);
 
+	my $youngest=0;
 	my @rdirlist;
 	my @rimglist;
 	my $D;
@@ -121,6 +122,8 @@ sub iterate {
 		if ($child->isdir) {
 			push(@rdirlist,$child);
 		} elsif ($child->isimg) {
+			my @stat = stat($child->{-fullpath});
+			$youngest = $stat[9] if ($youngest < $stat[9]);
 			push(@rimglist,$child);
 		}
 	}
@@ -143,6 +146,12 @@ sub iterate {
 	foreach my $dir(@dirlist) {
 		$dir->iterate;
 	}
+
+# no need to go beyond this point if the directory timestamp did not
+# change since we built index.html file last time.
+
+	my @istat = stat($self->{-fullpath}.'/index.html');
+	return unless ($youngest > $istat[9]);
 
 # 3. iterate through images to build cross-links,
 
@@ -361,80 +370,87 @@ sub makeaux {
 	# slideshow
 	for my $refresh('static', 'slide') {
 		my $fn = sprintf("%s/.html/%s-%s.html",$dn,$name,$refresh);
-		my $imgsrc = '../'.$self->{$sizes[1]};
-		my $fwdref;
-		my $bakref;
-		if ($nref) {
-			$fwdref = sprintf("%s-%s.html",$nref,$refresh);
-		} else {
-			$fwdref = '../index.html';
-		}
-		if ($pref) {
-			$bakref = sprintf("%s-%s.html",$pref,$refresh);
-		} else {
-			$bakref = '../index.html';
-		}
-		my $toggleref;
-		my $toggletext;
-		if ($refresh eq 'slide') {
-			$toggleref=sprintf("%s-static.html",$name);
-			$toggletext = 'Stop!';
-		} else {
-			$toggleref=sprintf("%s-slide.html",$name);
-			$toggletext = 'Play-&gt;';
-		}
-		my $F;
-		unless (open($F,'>'.$fn)) {
-			warn "cannot open \"$fn\": $!";
-			next;
-		}
-		if ($refresh eq 'slide') {
-			print $F start_html(-title=>$title,
+		if (isnewer($self->{-fullpath},$fn)) {
+			my $imgsrc = '../'.$self->{$sizes[1]};
+			my $fwdref;
+			my $bakref;
+			if ($nref) {
+				$fwdref = sprintf("%s-%s.html",$nref,$refresh);
+			} else {
+				$fwdref = '../index.html';
+			}
+			if ($pref) {
+				$bakref = sprintf("%s-%s.html",$pref,$refresh);
+			} else {
+				$bakref = '../index.html';
+			}
+			my $toggleref;
+			my $toggletext;
+			if ($refresh eq 'slide') {
+				$toggleref=sprintf("%s-static.html",$name);
+				$toggletext = 'Stop!';
+			} else {
+				$toggleref=sprintf("%s-slide.html",$name);
+				$toggletext = 'Play-&gt;';
+			}
+			my $F;
+			unless (open($F,'>'.$fn)) {
+				warn "cannot open \"$fn\": $!";
+				next;
+			}
+			if ($refresh eq 'slide') {
+				print $F start_html(
+					-title=>$title,
 					-bgcolor=>"#808080",
 					-head=>meta({-http_equiv=>'Refresh',
 						-content=>"3; url=$fwdref"}),
 					-style=>{-src=>$inc."gallery.css"},
-				),"\n";
-					
-		} else {
-			print $F start_html(-title=>$title,
+					),"\n";
+						
+			} else {
+				print $F start_html(-title=>$title,
 					-bgcolor=>"#808080",
 					-style=>{-src=>$inc."gallery.css"},
-				),"\n";
+					),"\n";
+			}
+			print $F start_center,"\n",
+				h1($title),"\n",
+				start_table({-class=>'navi'}),start_Tr,"\n",
+				td(a({-href=>"../index.html"},"Index")),"\n",
+				td(a({-href=>$bakref},"&lt;&lt;Prev")),"\n",
+				td(a({-href=>$toggleref},$toggletext)),"\n",
+				td(a({-href=>$fwdref},"Next&gt;&gt;")),"\n",
+				end_Tr,
+				end_table,"\n",
+				table({-class=>'picframe'},
+					Tr(td(img({-src=>$imgsrc})))),"\n",
+				end_center,"\n",
+				end_html,"\n";
+			close($F);
 		}
-		print $F start_center,"\n",
+	}
+
+	# info html
+	my $fn = sprintf("%s/.html/%s-info.html",$dn,$name);
+	if (isnewer($self->{-fullpath},$fn)) {
+		my $F;
+		unless (open($F,'>'.$fn)) {
+			warn "cannot open \"$fn\": $!";
+			return;
+		}
+		my $imgsrc = sprintf("../.%s/%s",$sizes[0],$name);
+		print $F start_html(-title=>$title,
+				-style=>{-src=>$inc."gallery.css"},),"\n",
+			start_center,"\n",
 			h1($title),"\n",
-			start_table({-class=>'navi'}),start_Tr,"\n",
-			td(a({-href=>"../index.html"},"Index")),"\n",
-			td(a({-href=>$bakref},"&lt;&lt;Prev")),"\n",
-			td(a({-href=>$toggleref},$toggletext)),"\n",
-			td(a({-href=>$fwdref},"Next&gt;&gt;")),"\n",
-			end_Tr,
-			end_table,"\n",
-			table({-class=>'picframe'},
-				Tr(td(img({-src=>$imgsrc})))),"\n",
+			table({-class=>'ipage'},
+				Tr(td(img({-src=>$imgsrc})),
+					td($self->infotable))),
+			a({-href=>'../index.html'},'Index'),"\n",
 			end_center,"\n",
 			end_html,"\n";
 		close($F);
 	}
-	my $fn = sprintf("%s/.html/%s-info.html",$dn,$name);
-	my $F;
-	unless (open($F,'>'.$fn)) {
-		warn "cannot open \"$fn\": $!";
-		return;
-	}
-
-	# info html
-	my $imgsrc = sprintf("../.%s/%s",$sizes[0],$name);
-	print $F start_html(-title=>$title,
-				-style=>{-src=>$inc."gallery.css"},),"\n",
-		start_center,"\n",
-		h1($title),"\n",
-		table({-class=>'ipage'},Tr(td(img({-src=>$imgsrc})),td($self->infotable))),
-		a({-href=>'../index.html'},'Index'),"\n",
-		end_center,"\n",
-		end_html,"\n";
-	close($F);
 }
 
 sub startindex {
