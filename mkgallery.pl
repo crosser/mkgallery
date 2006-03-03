@@ -34,7 +34,8 @@ use Image::Info qw/image_info dim/;
 use Term::ReadLine;
 use Getopt::Long;
 
-use Image::Magick;
+my $haveimagick = eval { require Image::Magick; };
+{ package Image::Magick; }	# to make perl compiler happy
 
 my @sizes = (160, 640);
 
@@ -119,11 +120,11 @@ sub iterate {
 	while (my $de = readdir($D)) {
 		next if ($de =~ /^\./);
 		my $child = $self->new($de);
+		my @stat = stat($child->{-fullpath});
+		$youngest = $stat[9] if ($youngest < $stat[9]);
 		if ($child->isdir) {
 			push(@rdirlist,$child);
 		} elsif ($child->isimg) {
-			my @stat = stat($child->{-fullpath});
-			$youngest = $stat[9] if ($youngest < $stat[9]);
 			push(@rimglist,$child);
 		}
 	}
@@ -146,12 +147,6 @@ sub iterate {
 	foreach my $dir(@dirlist) {
 		$dir->iterate;
 	}
-
-# no need to go beyond this point if the directory timestamp did not
-# change since we built index.html file last time.
-
-	my @istat = stat($self->{-fullpath}.'/index.html');
-	return unless ($youngest > $istat[9]);
 
 # 3. iterate through images to build cross-links,
 
@@ -177,6 +172,12 @@ sub iterate {
 		# finally, make aux html pages
 		$img->makeaux;
 	}
+
+# no need to go beyond this point if the directory timestamp did not
+# change since we built index.html file last time.
+
+	my @istat = stat($self->{-fullpath}.'/index.html');
+	return unless ($youngest > $istat[9]);
 
 # 5. start building index.html for the directory
 
@@ -340,19 +341,23 @@ sub isnewer {
 
 sub doscaling {
 	my ($src,$dest,$factor,$w,$h) = @_;	# this is not a method
-	my $im = new Image::Magick;
-	my $err;
-	print "doscaling $src -> $dest by $factor\n" if ($debug);
-	$err = $im->Read($src);
-	unless ($err) {
-		$im->Scale(width=>$w*$factor,height=>$h*$factor);
-		$err=$im->Write($dest);
-		warn "ImageMagick: write \"$dest\": $err" if ($err);
-	} else {	# fallback to command-line tools
-		warn "ImageMagick: read \"$src\": $err";
+
+	my $err=1;
+	if ($haveimagick) {
+		my $im = new Image::Magick;
+		print "doscaling $src -> $dest by $factor\n" if ($debug);
+		if ($err = $im->Read($src)) {
+			warn "ImageMagick: read \"$src\": $err";
+		} else {
+			$im->Scale(width=>$w*$factor,height=>$h*$factor);
+			$err=$im->Write($dest);
+			warn "ImageMagick: write \"$dest\": $err" if ($err);
+		}
+		undef $im;
+	}
+	if ($err) {	# fallback to command-line tools
 		system("djpeg \"$src\" | pnmscale \"$factor\" | cjpeg >\"$dest\"");
 	}
-	undef $im;
 }
 
 sub makeaux {

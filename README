@@ -37,7 +37,16 @@ this distribution.  Then, chdir to the root of your gallery and run
 for all subdirectories ("Albums"); if you wish to recreate the titles,
 remove ".title" files.  If you *don't* want "index.html" to be generated
 in some directory, create a file ".noindex".  This way you can preserve
-index created by hand or by some other script.
+index created by hand or by some other script like "mkindex.pl".
+
+command-line options:
+ --debug:	print a lot of debugging info to stdout as you run
+ --asktitle:	ask to edit subalbum titles even if there are ".title" files
+ --noasktitle:	don't ask to enter subalbum titles even where ".title"
+		files are absent.  Use partial directories as titles.
+
+The only way to specify titles for individual pictures is to write
+comments into the image files.
 
 "mkindex.pl" is a simple script that is completely unrelated to the
 gallery (theoretically).  If your tree starts with YYYY/DD (four
@@ -47,15 +56,13 @@ for subdirectories that are not four-digit.
 
 Requirements:
 Image::Info
-Image::Magick (might get rid of that later)
-Term::ReadLine (not at this moment but planned)
+Image::Magick (optional. If not present, will run djeg|pnmscale|cjpeg pipe)
+Term::ReadLine
 
 Download:
 svn co svn://svn.average.org/mkgallery/trunk mkgallery
 
 TODO:
-- build html and indices only if image/directory changed
-- make Image::Magick optional
-- anything else that I forgot
+- any ideas?
 
 Eugene Crosser <crosser at average dot org>
