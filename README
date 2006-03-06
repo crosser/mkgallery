@@ -21,48 +21,50 @@
   3. This notice may not be removed or altered from any source distribution.
 
 mkgallery.pl traverses directory tree starting from current directory
-downwards, and in each directory creates index.html file with the list
-of subdirectories and the list of image files in the directory.
-Fielsystem objects starting with '.' are not processed.  For every directory,
-a file ".title" is checked, and created if absent, with the title for this
-album.  Two subdirectories are created with scaled down versions of the
-images: ".640" and ".160", and a direcotory named ".html" containging
-slideshow pages (and info pages for non-javascript clients).
+downwards, and in each directory creates an index.html file with the
+list of subdirectories and the list of image files in the directory.
+Fielsystem objects starting with '.' are not processed.  For every
+directory, a file ".title" is checked, and created if absent, with the
+title for this album.  Two subdirectories are created with scaled down
+versions of the images: ".640" and ".160", and a direcotory named ".html"
+containging slideshow pages (and info pages for non-javascript clients).
 
 For the thing to work, you must create a subdirectory named ".include"
 at the root of your image gallery, or somewhere upstairs in the
-document tree, and put there files from the subdirectory "include" of
-this distribution.  Then, chdir to the root of your gallery and run
+document tree, and put there files from the subdirectory "include"
+of this distribution.  Then, chdir to the root of your gallery and run
 "mkgallery.pl" script.  First time, you will be asked to enter titles
 for all subdirectories ("Albums"); if you wish to recreate the titles,
-remove ".title" files.  If you *don't* want "index.html" to be generated
-in some directory, create a file ".noindex".  This way you can preserve
-index created by hand or by some other script like "mkindex.pl".
+remove ".title" files or specify "--asktitles".  If you *don't* want
+"index.html" to be generated in some directory, create a file ".noindex"
+there.  This way you can preserve index created by hand or by some other
+script like "mkindex.pl".
 
 command-line options:
  --debug:	print a lot of debugging info to stdout as you run
- --asktitle:	ask to edit subalbum titles even if there are ".title" files
- --noasktitle:	don't ask to enter subalbum titles even where ".title"
-		files are absent.  Use partial directories as titles.
+ --asktitle:	ask to edit album titles even if there are ".title" files
+ --noasktitle:	don't ask to enter album titles even where ".title"
+		files are absent.  Use partial directory names as titles.
 
 The only way to specify titles for individual pictures is to write
 comments into the image files.
 
 "mkindex.pl" is a simple script that is completely unrelated to the
 gallery (theoretically).  If your tree starts with YYYY/DD (four
-digit year and two-digit month, this script will create a compact
+digit year and two-digit month), this script will create a compact
 table with references to individual months, and then a separate list
-for subdirectories that are not four-digit.
+of subdirectories that are not four-digit.
 
 Requirements:
 Image::Info
 Image::Magick (optional. If not present, will run djeg|pnmscale|cjpeg pipe)
 Term::ReadLine
 
-Download:
-svn co svn://svn.average.org/mkgallery/trunk mkgallery
+Homepage:
+http://www.average.org/mkgallery/
 
 TODO:
+- make index.html depend of .title and directory timestamps
 - any ideas?
 
 Eugene Crosser <crosser at average dot org>
