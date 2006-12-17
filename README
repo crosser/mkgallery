@@ -41,7 +41,8 @@ there.  This way you can preserve index created by hand or by some other
 script like "mkindex.pl".
 
 command-line options:
- --incpath:     do not try to fine .include diretory upstream, use
+ --help:	print help message and exit
+ --incpath:	do not try to find .include diretory upstream, use
 		specified path (absolute or relavive).  Use with causion.
  --debug:	print a lot of debugging info to stdout as you run
  --asktitle:	ask to edit album titles even if there are ".title" files

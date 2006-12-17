@@ -51,14 +51,34 @@ my $noasktitle = 0;
 
 charset("utf-8");
 
-GetOptions(	'incpath'=>\$incpath,
+unless (GetOptions(
+		'help'=>\&help,
+		'incpath'=>\$incpath,
 		'asktitle'=>\$asktitle,
 		'noasktitle'=>\$noasktitle,
-		'debug'=>\$debug);
+		'debug'=>\$debug)) {
+	&help;
+}
 
 my $term = new Term::ReadLine "Edit Title";
 
 FsObj->new(getcwd)->iterate;
+
+sub help {
+
+	print STDERR <<__END__;
+usage: $0 [options]
+ --help:        print help message and exit
+ --incpath:     do not try to find .include diretory upstream, use
+                specified path (absolute or relavive).  Use with causion.
+ --debug:       print a lot of debugging info to stdout as you run
+ --asktitle:    ask to edit album titles even if there are ".title" files
+ --noasktitle:  don't ask to enter album titles even where ".title"
+                files are absent.  Use partial directory names as titles.
+__END__
+
+	exit 1;
+}
 
 sub new {
 	my $this = shift;
