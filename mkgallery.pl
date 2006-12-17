@@ -33,6 +33,9 @@ use CGI qw/:html *table *Tr *center *div/;
 use Image::Info qw/image_info dim/;
 use Term::ReadLine;
 use Getopt::Long;
+use Encode;
+use encoding 'utf-8';
+binmode(STDOUT, ":utf8");
 
 my $haveimagick = eval { require Image::Magick; };
 { package Image::Magick; }	# to make perl compiler happy
@@ -41,11 +44,15 @@ my @sizes = (160, 640);
 
 ######################################################################
 
+my $incpath;
 my $debug = 0;
 my $asktitle = 0;
 my $noasktitle = 0;
 
-GetOptions('asktitle'=>\$asktitle,
+charset("utf-8");
+
+GetOptions(	'incpath'=>\$incpath,
+		'asktitle'=>\$asktitle,
 		'noasktitle'=>\$noasktitle,
 		'debug'=>\$debug);
 
@@ -91,6 +98,10 @@ sub new {
 sub getinc {
 	my $fullpath=shift;	# this is not a method
 	my $depth=20;		# arbitrary max depth
+
+	if ($incpath) {
+		return $incpath."/.include";
+	}
 
 	my $inc=".include";
 	while ( ! -d $fullpath."/".$inc ) {
@@ -370,7 +381,7 @@ sub makeaux {
 	my $title = $self->{-info}->{'Comment'};
 	$title = $name unless ($title);
 
-	print "slide: \"$pref\"->\"$name\"->\"$nref\"\n" if ($debug);
+	print "slide: \"$title\": \"$pref\"->\"$name\"->\"$nref\"\n" if ($debug);
 
 	# slideshow
 	for my $refresh('static', 'slide') {
@@ -403,8 +414,10 @@ sub makeaux {
 				warn "cannot open \"$fn\": $!";
 				next;
 			}
+			binmode($F, ":utf8");
 			if ($refresh eq 'slide') {
 				print $F start_html(
+					-encoding=>"utf-8",
 					-title=>$title,
 					-bgcolor=>"#808080",
 					-head=>meta({-http_equiv=>'Refresh',
@@ -414,6 +427,7 @@ sub makeaux {
 						
 			} else {
 				print $F start_html(-title=>$title,
+					-encoding=>"utf-8",
 					-bgcolor=>"#808080",
 					-style=>{-src=>$inc."gallery.css"},
 					),"\n";
@@ -445,6 +459,7 @@ sub makeaux {
 		}
 		my $imgsrc = sprintf("../.%s/%s",$sizes[0],$name);
 		print $F start_html(-title=>$title,
+				-encoding=>"utf-8",
 				-style=>{-src=>$inc."gallery.css"},),"\n",
 			start_center,"\n",
 			h1($title),"\n",
@@ -468,11 +483,13 @@ sub startindex {
 		warn "cannot open $fn: $!";
 		return;
 	}
+	binmode($IND, ":utf8");
 	$self->{-IND} = $IND;
 
 	my $inc = $self->{-inc};
 	my $title = $self->{-title};
 	print $IND start_html(-title => $title,
+			-encoding=>"utf-8",
 			-style=>{-src=>[$inc."gallery.css",
 					$inc."lightbox.css"]},
 			-script=>[{-code=>"var incPrefix='$inc';"},
