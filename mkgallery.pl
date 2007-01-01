@@ -76,7 +76,11 @@ my $term = new Term::ReadLine "Edit Title";
 FsObj->new(getcwd)->iterate;
 
 if ($rssobj) {
-	$rssobj->save($rssfile);
+	my $itemstodel = @{$rssobj->{'rss'}->{'items'}} - 15;
+	while ($itemstodel-- > 0) {
+		pop(@{$rssobj->{'rss'}->{'items'}})
+	}
+	$rssobj->{'rss'}->save($rssobj->{'file'});
 }
 
 sub help {
@@ -165,8 +169,9 @@ sub getrss {
 		last unless ($depth-- > 0);
 	}
 	if ($depth > 0) {
-		$rssobj = new XML::RSS (version=>2);
-		$rssobj->parsefile($rss);
+		$rssobj->{'file'} = $rss;
+		$rssobj->{'rss'} = new XML::RSS (version=>2);
+		$rssobj->{'rss'}->parsefile($rss);
 		return $rss;
 	} else {
 		print STDERR "There is no $rssfile in this or parent ".
@@ -577,16 +582,13 @@ sub endindex {
 
 	close($IND) if ($IND);
 	undef $self->{-IND};
-	print STDERR "title=",$self->{-title},
-		", numofsubs=",$self->{-numofsubs},
-		", numofimgs=",$self->{-numofimgs},"\n";
 	if ($rssobj) {
 		my $rsstitle=sprintf "%s [%d images, %d subalbums]",
 				$self->{-title},
 				$self->{-numofimgs},
 				$self->{-numofsubs};
-		my $rsslink=$rssobj->channel('link')."index.html";
-		$rssobj->add_item(
+		my $rsslink=$rssobj->{'rss'}->channel('link')."index.html";
+		$rssobj->{'rss'}->add_item(
 			title		=> $self->{-title},
 			link		=> $rsslink,
 			description	=> $rsstitle,
