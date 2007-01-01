@@ -29,7 +29,7 @@ package FsObj;
 use strict;
 use Carp;
 use POSIX qw/getcwd strftime/;
-use CGI qw/:html *table *Tr *center *div/;
+use CGI qw/:html *table *Tr *center *div *Link/;
 use Image::Info qw/image_info dim/;
 use Term::ReadLine;
 use Getopt::Long;
@@ -40,14 +40,19 @@ binmode(STDOUT, ":utf8");
 my $haveimagick = eval { require Image::Magick; };
 { package Image::Magick; }	# to make perl compiler happy
 
+my $haverssxml = eval { require XML::RSS; };
+{ package XML::RSS; }		# to make perl compiler happy
+
 my @sizes = (160, 640);
 
 ######################################################################
 
 my $incpath;
+my $rssobj;
 my $debug = 0;
 my $asktitle = 0;
 my $noasktitle = 0;
+my $rssfile = "";
 
 charset("utf-8");
 
@@ -56,13 +61,23 @@ unless (GetOptions(
 		'incpath'=>\$incpath,
 		'asktitle'=>\$asktitle,
 		'noasktitle'=>\$noasktitle,
+		'rssfile=s'=>\$rssfile,
 		'debug'=>\$debug)) {
 	&help;
+}
+
+if ($rssfile && ! $haverssxml) {
+	print STDERR "You need to get XML::RSS from CPAN to use --rssfile\n";
+	exit 1;
 }
 
 my $term = new Term::ReadLine "Edit Title";
 
 FsObj->new(getcwd)->iterate;
+
+if ($rssobj) {
+	$rssobj->save($rssfile);
+}
 
 sub help {
 
@@ -75,6 +90,7 @@ usage: $0 [options]
  --asktitle:    ask to edit album titles even if there are ".title" files
  --noasktitle:  don't ask to enter album titles even where ".title"
                 files are absent.  Use partial directory names as titles.
+ --rssfile=...:	build RSS feed for newly added "albums", give name of rss file
 __END__
 
 	exit 1;
@@ -95,6 +111,7 @@ sub new {
 				-base=>$name,
 				-fullpath=>$fullpath,
 				-inc=>'../'.$parent->{-inc},
+				-rss=>'../'.$parent->{-rss},
 			};
 	} else {
 		$class = $this;
@@ -103,6 +120,7 @@ sub new {
 				-root=>$root,
 				-fullpath=>$root,
 				-inc=>getinc($root),
+				-rss=>getrss($root),
 			};
 	}
 	bless $self, $class;
@@ -132,6 +150,28 @@ sub getinc {
 		return $inc.'/';		# prefix with trailing slash
 	} else {
 		return 'NO-.INCLUDE-IN-PATH/';	# won't work anyway
+	}
+}
+
+sub getrss {
+	my $fullpath=shift;	# this is not a method
+	my $depth=20;		# arbitrary max depth
+
+	return "" unless $rssfile;
+
+	my $rss=$rssfile;
+	while ( ! -f $fullpath."/".$rss ) {
+		$rss = "../".$rss;
+		last unless ($depth-- > 0);
+	}
+	if ($depth > 0) {
+		$rssobj = new XML::RSS (version=>2);
+		$rssobj->parsefile($rss);
+		return $rss;
+	} else {
+		print STDERR "There is no $rssfile in this or parent ".
+			"directories, you must create one with mkgalrss.pl\n";
+		exit 1;
 	}
 }
 
@@ -508,8 +548,16 @@ sub startindex {
 
 	my $inc = $self->{-inc};
 	my $title = $self->{-title};
+	my $rsslink="";
+	if ($self->{-rss}) {
+		$rsslink=Link({-rel=>'alternate',
+				-type=>'application/rss+xml',
+				-title=>'RSS',
+				-href=>$self->{-rss}});
+	}
 	print $IND start_html(-title => $title,
 			-encoding=>"utf-8",
+			-head=>$rsslink,
 			-style=>{-src=>[$inc."gallery.css",
 					$inc."lightbox.css"]},
 			-script=>[{-code=>"var incPrefix='$inc';"},
@@ -529,6 +577,21 @@ sub endindex {
 
 	close($IND) if ($IND);
 	undef $self->{-IND};
+	print STDERR "title=",$self->{-title},
+		", numofsubs=",$self->{-numofsubs},
+		", numofimgs=",$self->{-numofimgs},"\n";
+	if ($rssobj) {
+		my $rsstitle=sprintf "%s [%d images, %d subalbums]",
+				$self->{-title},
+				$self->{-numofimgs},
+				$self->{-numofsubs};
+		my $rsslink=$rssobj->channel('link')."index.html";
+		$rssobj->add_item(
+			title		=> $self->{-title},
+			link		=> $rsslink,
+			description	=> $rsstitle,
+		);
+	}
 }
 
 sub startsublist {
@@ -544,6 +607,7 @@ sub sub_entry {
 	my $name = $self->{-base};
 	my $title = $self->{-title};
 
+	$self->{-parent}->{-numofsubs}++;
 	print $IND Tr(td(a({-href=>$name.'/index.html'},$name)),
 			td(a({-href=>$name.'/index.html'},$title))),"\n";
 }
@@ -577,6 +641,7 @@ sub img_entry {
 	my $info = $self->{-info};
 	my ($w, $h) = dim($info);
 
+	$self->{-parent}->{-numofimgs}++;
 	print $IND start_div({-class=>'ibox',-id=>$name,
 				-OnClick=>"HideIbox('$name');"}),"\n",
 		start_div({-class=>'iboxtitle'}),
