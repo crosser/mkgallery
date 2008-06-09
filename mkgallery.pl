@@ -564,10 +564,30 @@ sub startindex {
 			-encoding=>"utf-8",
 			-head=>$rsslink,
 			-style=>{-src=>[$inc."gallery.css",
-					$inc."lightbox.css"]},
-			-script=>[{-code=>"var incPrefix='$inc';"},
+					$inc."lightbox.css"],
+				-code=>"\
+.lbLoading {background: #fff url(".$inc."loading.gif) no-repeat center;}
+#lbPrevLink {background: transparent url(".$inc.
+					"prevlabel.gif) no-repeat 0% 15%;}
+#lbPrevLink:hover {background: transparent url(".$inc.
+					"prevlabel.gif) no-repeat 0% 15%;}
+#lbNextLink {background: transparent url(".$inc.
+					"nextlabel.gif) no-repeat 0% 15%;}
+#lbNextLink:hover {background: transparent url(".$inc.
+					"nextlabel.gif) no-repeat 0% 15%;}
+#lbCloseLink {background: transparent url(".$inc.
+					"closelabel.gif) no-repeat center;}
+.lightboxDesc {display: block;}"},
+			-script=>[
+				{-src=>$inc."mootools.js"},
 				{-src=>$inc."gallery.js"},
-				{-src=>$inc."lightbox.js"}]),
+				{-src=>$inc."lightbox.js"},
+				{-code=>"\
+var incPrefix='$inc';
+window.addEvent('domready',function(){
+ Lightbox.init({descriptions: '.lightboxDesc', showControls: true});
+});"}
+			]),
 		a({-href=>"../index.html"},"UP"),"\n",
 		start_center,"\n",
 		h1($title),"\n",
@@ -655,14 +675,23 @@ sub img_entry {
 		$self->infotable,
 		end_div,"\n";
 
-	print $IND table({-class=>'slide'},Tr(td(
-		a({-href=>".html/$name-info.html",-title=>'Image Info',
-			-onClick=>"return showIbox('$name');"},$title),
-		br,
-		a({-href=>$medium,-rel=>"lightbox",-title=>$title},
+	print $IND a({-name=>$name}),
+		table({-class=>'slide'},Tr(td(
+		div({-class=>"lightboxDesc $name"},
+			a({-href=>".html/$name-info.html",-title=>'Image Info',
+				-onClick=>"return showIbox('$name');"},
+				$title)),
+		a({-href=>".html/$name-static.html",-title=>$title,
+			-id=>$name,
+			-OnClick=>"Lightbox.show('$medium','$title');return false;"},
 			img({-src=>$thumb})),
 		br,
-		a({-href=>$name,-title=>'Original Image'},"($w x $h)"),
+		div({-style=>"display: none;"},
+			a({-href=>$thumb,-rel=>"lightbox[thm]",
+					-title=>'Thumb'},"Thm"),
+			a({-href=>$medium,-rel=>"lightbox[sml]",
+					-title=>'Small'},"Sml")),
+		a({-href=>$name,-title=>'Original'},"($w x $h)"),
 		br))),"\n";
 }
 
