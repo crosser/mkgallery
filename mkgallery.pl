@@ -3,10 +3,10 @@
 # $Id$
 
 # Recursively create image gallery index and slideshow wrappings.
-# Makes use of (slightly modified) "lightbox" Javascript/CSS as published
-# at http://www.huddletogether.com/projects/lightbox/
+# Makes use of modified "slideshow" javascript by Samuel Birch
+# http://www.phatfusion.net/slideshow/
 
-# Copyright (c) 2006 Eugene G. Crosser
+# Copyright (c) 2006-2008 Eugene G. Crosser
 
 #  This software is provided 'as-is', without any express or implied
 #  warranty.  In no event will the authors be held liable for any damages
@@ -29,7 +29,7 @@ package FsObj;
 use strict;
 use Carp;
 use POSIX qw/getcwd strftime/;
-use CGI qw/:html *table *Tr *center *div *Link/;
+use CGI qw/:html *table *Tr *td *center *div *Link/;
 use Image::Info qw/image_info dim/;
 use Term::ReadLine;
 use Getopt::Long;
@@ -43,7 +43,7 @@ my $haveimagick = eval { require Image::Magick; };
 my $haverssxml = eval { require XML::RSS; };
 { package XML::RSS; }		# to make perl compiler happy
 
-my @sizes = (160, 640);
+my @sizes = (160, 640, 1600);
 
 ######################################################################
 
@@ -397,9 +397,11 @@ sub makescaled {
 		my $nfn = $dn.'/'.$nref;
 		my $factor=$size/$max;
 		if ($factor >= 1) {
-			$self->{$size} = $name;	# unscaled version will do
+			$self->{$size}->{'url'} = $name; # unscaled version
+			$self->{$size}->{'dim'} = [$w, $h];
 		} else {
-			$self->{$size} = $nref;
+			$self->{$size}->{'url'} = $nref;
+			$self->{$size}->{'dim'} = [$w*$factor, $h*$factor];
 			if (isnewer($fn,$nfn)) {
 				doscaling($fn,$nfn,$factor,$w,$h);
 			}
@@ -563,30 +565,18 @@ sub startindex {
 	print $IND start_html(-title => $title,
 			-encoding=>"utf-8",
 			-head=>$rsslink,
-			-style=>{-src=>[$inc."gallery.css",
-					$inc."lightbox.css"],
-				-code=>"\
-.lbLoading {background: #fff url(".$inc."loading.gif) no-repeat center;}
-#lbPrevLink {background: transparent url(".$inc.
-					"prevlabel.gif) no-repeat 0% 15%;}
-#lbPrevLink:hover {background: transparent url(".$inc.
-					"prevlabel.gif) no-repeat 0% 15%;}
-#lbNextLink {background: transparent url(".$inc.
-					"nextlabel.gif) no-repeat 0% 15%;}
-#lbNextLink:hover {background: transparent url(".$inc.
-					"nextlabel.gif) no-repeat 0% 15%;}
-#lbCloseLink {background: transparent url(".$inc.
-					"closelabel.gif) no-repeat center;}
-.lightboxDesc {display: block;}"},
+			-style=>{-src=>[$inc."gallery.css"],
+				-code=>
+".loading {background: url(".$inc."loading.gif) center no-repeat;}"
+			},
 			-script=>[
 				{-src=>$inc."mootools.js"},
+				{-src=>$inc."urlparser.js"},
 				{-src=>$inc."gallery.js"},
-				{-src=>$inc."lightbox.js"},
+				{-src=>$inc."slideshow.js"},
 				{-code=>"\
-var incPrefix='$inc';
-window.addEvent('domready',function(){
- Lightbox.init({descriptions: '.lightboxDesc', showControls: true});
-});"}
+var incPrefix='$inc';window.addEvent('domready',init_gallery);\
+				"}
 			]),
 		a({-href=>"../index.html"},"UP"),"\n",
 		start_center,"\n",
@@ -648,7 +638,26 @@ sub startimglist {
 	my $slideref = sprintf(".html/%s-slide.html",$first);
 
 	print $IND h2("Images"),"\n",
-		a({-href=>$slideref},'Slideshow'),
+		a({-href=>$slideref,
+			-onClick=>"return run_slideshow(-1);"},
+			'Slideshow'),
+		start_div({-id=>"slideshowWindow",-class=>"slideshowWindow"}),
+		div({-id=>"slideshowContainer",
+			-class=>"slideshowContainer"},""),
+		start_div({-id=>"slideshowControls",
+			-class=>"slideshowControls"}),
+		a({-href=>"#",-onClick=>"show.previous();return false;"},
+			"Prev"),
+		a({-href=>"#",-onClick=>"show.play();return false;"},
+			"Play"),
+		a({-href=>"#",-onClick=>"show.stop();return false;"},
+			"Stop"),
+		a({-href=>"#",-onClick=>"show.next();return false;"},
+			"Next"),
+		a({-href=>"#",-onClick=>"stop_slideshow();return false;"},
+			"Exit"),
+		end_div,
+		end_div,
 		"\n";
 }
 
@@ -658,11 +667,11 @@ sub img_entry {
 	my $name = $self->{-base};
 	my $title = $self->{-info}->{'Comment'};
 	$title = $name unless ($title);
-	my $thumb = $self->{$sizes[0]};
-	my $medium = $self->{$sizes[1]};
+	my $thumb = $self->{$sizes[0]}->{'url'};
 	my $info = $self->{-info};
 	my ($w, $h) = dim($info);
 
+	my $i=0+$self->{-parent}->{-numofimgs};
 	$self->{-parent}->{-numofimgs}++;
 	print $IND start_div({-class=>'ibox',-id=>$name,
 				-OnClick=>"HideIbox('$name');"}),"\n",
@@ -675,24 +684,32 @@ sub img_entry {
 		$self->infotable,
 		end_div,"\n";
 
-	print $IND a({-name=>$name}),
-		table({-class=>'slide'},Tr(td(
-		div({-class=>"lightboxDesc $name"},
-			a({-href=>".html/$name-info.html",-title=>'Image Info',
+	print $IND a({-name=>$i}),"\n",
+		start_table({-class=>'slide'}),start_Tr,start_td,"\n",
+		div({-class=>'slidetitle',-id=>$name},
+			a({-href=>".html/$name-info.html",
+				-title=>'Image Info',
 				-onClick=>"return showIbox('$name');"},
-				$title)),
-		a({-href=>".html/$name-static.html",-title=>$title,
-			-id=>$name,
-			-OnClick=>"Lightbox.show('$medium','$title');return false;"},
-			img({-src=>$thumb})),
-		br,
-		div({-style=>"display: none;"},
-			a({-href=>$thumb,-rel=>"lightbox[thm]",
-					-title=>'Thumb'},"Thm"),
-			a({-href=>$medium,-rel=>"lightbox[sml]",
-					-title=>'Small'},"Sml")),
-		a({-href=>$name,-title=>'Original'},"($w x $h)"),
-		br))),"\n";
+				$title)),"\n",
+		div({-class=>'slideimage',-id=>$name},
+			a({-href=>".html/$name-static.html",-title=>$title,
+				-id=>$name,
+				-OnClick=>"return run_slideshow(".$i.");"},
+				img({-src=>$thumb}))),"\n",
+		start_div({-class=>'varimages',-id=>$i});
+	foreach my $sz(@sizes) {
+		my $src=$self->{$sz}->{'url'};
+		my $w=$self->{$sz}->{'dim'}->[0];
+		my $h=$self->{$sz}->{'dim'}->[1];
+		print $IND a({-href=>$src,-style=>"display: none;",
+			-class=>($sz == 640)?"slideshowThumbnail":"",
+			-title=>"Reduced to ".$w."x".$h},
+			$w."x".$h)," ";
+	}
+	print $IND a({-href=>$name,
+				-title=>'Original'},$w."x".$h),
+		end_div,"\n",
+		end_td,end_Tr,end_table,"\n";
 }
 
 sub endimglist {

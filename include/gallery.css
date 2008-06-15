@@ -1,3 +1,8 @@
+/*
+	This is a part of mkgallery.pl suite
+	http://www.average.org/mkgallery/
+*/
+
 img {
  clear:both;
  border-style: inset;
@@ -86,3 +91,17 @@ table.picframe {
  margin: 10px;
  padding: 10px;
 }
+
+
+
+.slideshowWindow {
+ background-color: black;
+}
+
+.slideshowContainer {
+ border: 1px solid #ccc;
+ width: 99%;
+ height: 95%;
+ margin-bottom: 5px;
+}
+
