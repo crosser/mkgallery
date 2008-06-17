@@ -136,3 +136,6 @@ function init_gallery() {
   run_slideshow(parsedurl['anchor'])
  }
 }
+
+/* Initialization */
+window.addEvent('domready',init_gallery)

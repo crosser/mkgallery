@@ -572,11 +572,9 @@ sub startindex {
 			-script=>[
 				{-src=>$inc."mootools.js"},
 				{-src=>$inc."urlparser.js"},
-				{-src=>$inc."gallery.js"},
 				{-src=>$inc."slideshow.js"},
-				{-code=>"\
-var incPrefix='$inc';window.addEvent('domready',init_gallery);\
-				"}
+				{-src=>$inc."gallery.js"},
+				{-code=>"var incPrefix='$inc';"}
 			]),
 		a({-href=>"../index.html"},"UP"),"\n",
 		start_center,"\n",
