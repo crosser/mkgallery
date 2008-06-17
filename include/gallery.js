@@ -115,8 +115,40 @@ function stop_slideshow() {
  return false;
 }
 
+/* List of lists of img variations. Each image variation is a three-element  */
+/* array: [width, height, url]. Index of the outer array is the global ID.   */
+var vimgs=[]
+/*
+ * [
+ *  [
+ *   [width, height, url]
+ *   ...
+ *  ]
+ *  ...
+ * ]
+*/
 /* Initialize everything, to be called on domready */
 function init_gallery() {
+ $$('.'+'varimages').each(function(el){
+  vimgs[el.id]=[]
+  el.getElements('a').each(function(ael,i){
+   dim = /(\d+)[^\d](\d+)/.exec(ael.text)
+   w = dim[1]
+   h = dim[2]
+   vimgs[id][i]=[w,h,ael.href]
+  })
+ })
+   /* debugging output
+ var msg='loaded '+vimgs.length+' image descriptions:'
+ vimgs.each(function(vimg,i){
+  msg+='\nid='+i
+  vimg.each(function(vimg,i){
+   msg+='\n     w='+vimg[0]+' h='+vimg[1]+' url='+vimg[2]
+  })
+ })
+ alert(msg)
+   /* end debugging output */
+
  var winparms = {}
  showwin = new ShowWindow('slideshowWindow',winparms)
 
