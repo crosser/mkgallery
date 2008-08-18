@@ -565,10 +565,7 @@ sub startindex {
 	print $IND start_html(-title => $title,
 			-encoding=>"utf-8",
 			-head=>$rsslink,
-			-style=>{-src=>[$inc."gallery.css"],
-				-code=>
-".loading {background: url(".$inc."loading.gif) center no-repeat;}"
-			},
+			-style=>{-src=>$inc."gallery.css"},
 			-script=>[
 				{-src=>$inc."mootools.js"},
 				{-src=>$inc."urlparser.js"},

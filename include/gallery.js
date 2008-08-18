@@ -129,8 +129,9 @@ var vimgs=[]
 */
 /* Initialize everything, to be called on domready */
 function init_gallery() {
- $$('.'+'varimages').each(function(el){
-  vimgs[el.id]=[]
+ $$('div.varimages').each(function(el){
+  var id=el.id
+  vimgs[id]=[]
   el.getElements('a').each(function(ael,i){
    dim = /(\d+)[^\d](\d+)/.exec(ael.text)
    w = dim[1]

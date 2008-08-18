@@ -92,7 +92,9 @@ table.picframe {
  padding: 10px;
 }
 
-
+.loading {
+ background: url(loading.gif) center no-repeat;
+}
 
 .slideshowWindow {
  background-color: black;
