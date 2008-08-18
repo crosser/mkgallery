@@ -568,7 +568,9 @@ sub startindex {
 			-style=>{-src=>$inc."gallery.css"},
 			-script=>[
 				{-src=>$inc."mootools.js"},
+				{-src=>$inc."overlay.js"},
 				{-src=>$inc."urlparser.js"},
+				{-src=>$inc."multibox.js"},
 				{-src=>$inc."slideshow.js"},
 				{-src=>$inc."gallery.js"},
 				{-code=>"var incPrefix='$inc';"}
@@ -684,7 +686,7 @@ sub img_entry {
 		div({-class=>'slidetitle',-id=>$name},
 			a({-href=>".html/$name-info.html",
 				-title=>'Image Info',
-				-onClick=>"return showIbox('$name');"},
+				-class=>'infobox'},
 				$title)),"\n",
 		div({-class=>'slideimage',-id=>$name},
 			a({-href=>".html/$name-static.html",-title=>$title,
