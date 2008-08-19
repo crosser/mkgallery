@@ -65,7 +65,7 @@ var Overlay = new Class({
 			this.options.onClick();
 		}.bind(this));
 		
-		this.fade = new Fx.Tween(this.container, 'opacity').set(0);
+		this.fade = new Fx.Tween(this.container).set('opacity', 0);
 		this.position();
 		
 		window.addEvent('resize', this.position.bind(this));

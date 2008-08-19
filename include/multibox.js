@@ -31,8 +31,8 @@ var MultiBox = new Class({
 			offset: {x:0, y:0},
 			fixedTop: false,
 			path: 'files/',
-			onOpen: Class.empty,
-			onClose: Class.empty,
+			onOpen: $empty,
+			onClose: $empty,
 			openFromLink: true,
 			relativeToWindow: true
 		};
@@ -119,8 +119,8 @@ var MultiBox = new Class({
 			}
 		}, this);
 		
-		this.containerEffects = new Fx.Styles(this.container, {duration: 400, transition: Fx.Transitions.sineInOut});
-		this.controlEffects = new Fx.Styles(this.controlsContainer, {duration: 300, transition: Fx.Transitions.sineInOut});
+		this.containerEffects = new Fx.Morph(this.container, {duration: 400, transition: Fx.Transitions.sineInOut});
+		this.controlEffects = new Fx.Morph(this.controlsContainer, {duration: 300, transition: Fx.Transitions.sineInOut});
 		
 		this.reset();
 	},
@@ -453,7 +453,7 @@ var MultiBox = new Class({
 			}
 		}
 		
-		this.contentEffects = new Fx.Styles(this.contentContainer, {duration: 500, transition: Fx.Transitions.linear});
+		this.contentEffects = new Fx.Morph(this.contentContainer, {duration: 500, transition: Fx.Transitions.linear});
 		this.contentEffects.start({
 			opacity: 1
 		});

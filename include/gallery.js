@@ -129,7 +129,8 @@ function init_gallery() {
  var iboxparams = {
   useOverlay: true,
   showNumbers: false,
-  openFromLink: false
+  openFromLink: false,
+  descClassName: 'infoboxdesc',
  }
  ibox = new MultiBox('infobox', iboxparams)
 
