@@ -75,14 +75,6 @@ my $term = new Term::ReadLine "Edit Title";
 
 FsObj->new(getcwd)->iterate;
 
-if ($rssobj) {
-	my $itemstodel = @{$rssobj->{'rss'}->{'items'}} - 15;
-	while ($itemstodel-- > 0) {
-		pop(@{$rssobj->{'rss'}->{'items'}})
-	}
-	$rssobj->{'rss'}->save($rssobj->{'file'});
-}
-
 sub help {
 
 	print STDERR <<__END__;
@@ -172,6 +164,11 @@ sub getrss {
 		$rssobj->{'file'} = $rss;
 		$rssobj->{'rss'} = new XML::RSS (version=>2);
 		$rssobj->{'rss'}->parsefile($rss);
+		my $itemstodel = @{$rssobj->{'rss'}->{'items'}} - 15;
+		while ($itemstodel-- > 0) {
+			pop(@{$rssobj->{'rss'}->{'items'}})
+		}
+		$rssobj->{'rss'}->save($rssobj->{'file'});
 		return $rss;
 	} else {
 		print STDERR "There is no $rssfile in this or parent ".
