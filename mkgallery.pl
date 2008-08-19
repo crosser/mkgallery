@@ -667,23 +667,13 @@ sub img_entry {
 
 	my $i=0+$self->{-parent}->{-numofimgs};
 	$self->{-parent}->{-numofimgs}++;
-	print $IND start_div({-class=>'ibox',-id=>$name,
-				-OnClick=>"HideIbox('$name');"}),"\n",
-		start_div({-class=>'iboxtitle'}),
-		span({-style=>'float: left;'},b("Info for $name")),
-		span({-style=>'float: right;'},
-			a({-href=>"#",-OnClick=>"HideIbox('$name');"},"Close")),
-		br({-clear=>'all'}),"\n",
-		end_div,"\n",
-		$self->infotable,
-		end_div,"\n";
 
 	print $IND a({-name=>$i}),"\n",
 		start_table({-class=>'slide'}),start_Tr,start_td,"\n",
 		div({-class=>'slidetitle',-id=>$name},
 			a({-href=>".html/$name-info.html",
 				-title=>'Image Info',
-				-class=>'infobox'},
+				-class=>'infoBox'},
 				$title)),"\n",
 		div({-class=>'slideimage',-id=>$name},
 			a({-href=>".html/$name-static.html",-title=>$title,

@@ -126,13 +126,19 @@ function init_gallery() {
  alert(msg)
    /* end debugging output */
 
+ var ovlparams = {}
+ ovl = new overlay(ovlparams)
+
  var iboxparams = {
-  useOverlay: true,
+  overlay: ovl,
   showNumbers: false,
+  showControls: true,
   openFromLink: false,
-  descClassName: 'infoboxdesc',
+  movieWidth: 640,
+  movieHeight: 480,
+  descClassName: 'infoBoxDesc',
  }
- ibox = new multiBox('infobox', iboxparams)
+ ibox = new multiBox('infoBox', iboxparams)
 
  var winparms = {}
  showwin = new showWindow('slideshowWindow',winparms)
