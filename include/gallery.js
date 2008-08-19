@@ -10,13 +10,13 @@
 	Slideshow
 */
 
-var ShowWindow = new Class({
+var showWindow = new Class({
 
 	getOptions: function(){
 		return {
 			zIndex: 2,
 			container: document.body,
-			onClick: Class.empty
+			onClick: $empty,
 		};
 	},
 
@@ -69,7 +69,7 @@ var ShowWindow = new Class({
 		this.div.setStyles({display: 'none'});
 	}
 });
-ShowWindow.implement(new Options);
+showWindow.implement(new Options);
 
 /* Make overlay window and start slideshow */
 function run_slideshow(startid) {
@@ -132,10 +132,10 @@ function init_gallery() {
   openFromLink: false,
   descClassName: 'infoboxdesc',
  }
- ibox = new MultiBox('infobox', iboxparams)
+ ibox = new multiBox('infobox', iboxparams)
 
  var winparms = {}
- showwin = new ShowWindow('slideshowWindow',winparms)
+ showwin = new showWindow('slideshowWindow',winparms)
 
  var showparms = {
   wait: 3000,
@@ -145,7 +145,7 @@ function init_gallery() {
   thumbnails: true,
   onClick: function(i){alert(i)}
  }
- show = new SlideShow('slideshowContainer','slideshowThumbnail',showparms)
+ show = new slideShow('slideshowContainer','slideshowThumbnail',showparms)
 
  parsedurl = parseUrl(document.URL)
  // alert('Anchor: '+parsedurl['anchor']+'\nURL: '+document.URL)

@@ -1,7 +1,7 @@
 
 /**************************************************************
 
-	Script		: Overlay
+	Script		: overlay
 	Version		: 1.2
 	Authors		: Samuel birch
 	Desc		: Covers the window with a semi-transparent layer.
@@ -9,7 +9,7 @@
 
 **************************************************************/
 
-var Overlay = new Class({
+var overlay = new Class({
 	
 	getOptions: function(){
 		return {
@@ -17,7 +17,7 @@ var Overlay = new Class({
 			opacity: 0.7,
 			zIndex: 1,
 			container: document.body,
-			onClick: Class.empty
+			_onClick: $empty
 		};
 	},
 
@@ -38,7 +38,7 @@ var Overlay = new Class({
 			'id': 'OverlayIframe',
 			'name': 'OverlayIframe',
 			'src': 'javascript:void(0);',
-			'frameborder': 1,
+			'frameborder': 0,
 			'scrolling': 'no'
 		}).setStyles({
 			'position': 'absolute',
@@ -61,14 +61,21 @@ var Overlay = new Class({
 			backgroundColor: this.options.colour
 		}).injectInside(this.container);
 		
-		this.container.addEvent('click', function(){
-			this.options.onClick();
-		}.bind(this));
+		if(this.options._onClick){
+			this.container.addEvent('click', function(){
+				this.options._onClick.call(this)
+			}.bind(this));
+		}
 		
-		this.fade = new Fx.Tween(this.container).set('opacity', 0);
+		//this.fade = new Fx.Tween(this.container).set('opacity', 0);
+		this.container.fade('hide');
 		this.position();
 		
 		window.addEvent('resize', this.position.bind(this));
+	},
+	
+	setOnClick: function(func){
+		this.container.addEvent('click', func);
 	},
 	
 	position: function(){ 
@@ -87,14 +94,16 @@ var Overlay = new Class({
 	},
 	
 	show: function(){
-		this.fade.start(0,this.options.opacity);
+		//this.fade.start(0,this.options.opacity);
+		this.container.fade(this.options.opacity);
 	},
 	
 	hide: function(){
-		this.fade.start(this.options.opacity,0);
+		//this.fade.start(this.options.opacity,0);
+		this.container.fade('out');
 	}
 	
 });
-Overlay.implement(new Options);
+overlay.implement(new Options);
 
 /*************************************************************/

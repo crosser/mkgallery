@@ -31,25 +31,6 @@ table.slide td {
  vertical-align: middle;
 }
 
-div.ibox {
- background-color: #ffffc0;
- border: 1px solid black;
- margin: 0px;
- padding: 0px;
- font-size: 10px;
- display: none;
- z-index: 1000;
- position: absolute;
-}
-div.iboxtitle {
- background-color: blue;
- margin: 0px;
- padding: 0.5ex;
-}
-div.iboxtitle * {
- color: white;
-}
-
 table.ipage {
  background-color: #ffffc0;
  border: 1px solid black;

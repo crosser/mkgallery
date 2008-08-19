@@ -1,15 +1,15 @@
 
 /**************************************************************
 
-	Script		: SlideShow
+	Script		: slideShow
 	Version		: 1.3
 	Authors		: Samuel Birch
-	Desc		: 
+	Desc		: transitions between images
 	Licence		: Open Source MIT Licence
 
 **************************************************************/
 
-var SlideShow = new Class({
+var slideShow = new Class({
 	
 	getOptions: function(){
 		return {
@@ -17,12 +17,12 @@ var SlideShow = new Class({
 			duration: 2000,
 			transition: Fx.Transitions.linear,
 			direction: 'right', //top|right|bottom|left|random
-			color: false,
+			//color: false,
 			wait: 5000,
-			loop: false,
+			loop: true,
 			thumbnails: false,
 			thumbnailCls: 'outline',
-			backgroundSlider: false,
+			backgroundSlider: false, //change to be an instance.
 			loadingCls: 'loading',
 			onClick: false
 		};
@@ -156,7 +156,8 @@ var SlideShow = new Class({
 		});
 		var img = this.newImage.getElement('img');
 		if(img){
-			img.replaceWith(this.imageObj.clone());
+			this.imageObj.clone().replaces(img);
+			//img.replaces(this.imageObj.clone());
 		}else{
 			var obj = this.imageObj.clone();
 			obj.injectInside(this.newImage);
@@ -216,6 +217,7 @@ var SlideShow = new Class({
 		if(doNext){
 			this.cloneImage();
 			$clear(this.timer);
+			/* console.log(this.image) */
 			if(this.image < this.images.length-1){
 				if(wait){
 					this.wait();
@@ -249,7 +251,8 @@ var SlideShow = new Class({
 	cloneImage: function(){
 		var img = this.oldImage.getElement('img');
 		if(img){
-			img.replaceWith(this.imageObj.clone());
+			this.imageObj.clone().replaces(img);
+			//img.replaces(this.imageObj.clone());
 		}else{
 			var obj = this.imageObj.clone();
 			obj.injectInside(this.oldImage);
@@ -268,7 +271,7 @@ var SlideShow = new Class({
 	
 	effect: function(){
 		this.animating = true;
-		this.effectObj = this.newImage.effects({
+		this.effectObj = new Fx.Morph(this.newImage, {
 			duration: this.options.duration,
 			transition: this.options.transition
 		});
@@ -355,10 +358,9 @@ var SlideShow = new Class({
 	},
 	
 	wipe: function(){
-		this.oldImage.effects({
+		this.newImage.morph({
 			duration: this.options.duration,
-			transition: this.options.transition
-		}).start({
+			transition: this.options.transition,
 			top: [0,this.topOut],
 			left: [0, this.leftOut]
 		})
@@ -390,8 +392,8 @@ var SlideShow = new Class({
 	}
 	
 });
-SlideShow.implement(new Options);
-SlideShow.implement(new Events);
+slideShow.implement(new Options);
+slideShow.implement(new Events);
 
 
 /*************************************************************/
