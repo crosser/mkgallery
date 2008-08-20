@@ -398,7 +398,8 @@ sub makescaled {
 			$self->{$size}->{'dim'} = [$w, $h];
 		} else {
 			$self->{$size}->{'url'} = $nref;
-			$self->{$size}->{'dim'} = [$w*$factor, $h*$factor];
+			$self->{$size}->{'dim'} = [int($w*$factor+.5),
+							int($h*$factor+.5)];
 			if (isnewer($fn,$nfn)) {
 				doscaling($fn,$nfn,$factor,$w,$h);
 			}
@@ -451,7 +452,7 @@ sub makeaux {
 	for my $refresh('static', 'slide') {
 		my $fn = sprintf("%s/.html/%s-%s.html",$dn,$name,$refresh);
 		if (isnewer($self->{-fullpath},$fn)) {
-			my $imgsrc = '../'.$self->{$sizes[1]};
+			my $imgsrc = '../'.$self->{$sizes[1]}->{'url'};
 			my $fwdref;
 			my $bakref;
 			if ($nref) {
@@ -496,18 +497,16 @@ sub makeaux {
 					-style=>{-src=>$inc."gallery.css"},
 					),"\n";
 			}
-			print $F start_center,"\n",
-				h1($title),"\n",
-				start_table({-class=>'navi'}),start_Tr,"\n",
+			print $F start_table({-class=>'navi'}),start_Tr,"\n",
 				td(a({-href=>"../index.html"},"Index")),"\n",
 				td(a({-href=>$bakref},"&lt;&lt;Prev")),"\n",
 				td(a({-href=>$toggleref},$toggletext)),"\n",
 				td(a({-href=>$fwdref},"Next&gt;&gt;")),"\n",
+				td({-class=>'title'},$title),"\n",
 				end_Tr,
 				end_table,"\n",
-				table({-class=>'picframe'},
-					Tr(td(img({-src=>$imgsrc})))),"\n",
-				end_center,"\n",
+				center(table({-class=>'picframe'},
+					Tr(td(img({-src=>$imgsrc}))))),"\n",
 				end_html,"\n";
 			close($F);
 		}
@@ -637,10 +636,9 @@ sub startimglist {
 	my $first = $self->{-firstimg}->{-base};
 	my $slideref = sprintf(".html/%s-slide.html",$first);
 
-	print $IND h2("Images"),"\n",
-		a({-href=>$slideref,
-			-onClick=>"return run_slideshow(-1);"},
-			'Slideshow'),
+	print $IND h2("Images ",
+		a({-href=>$slideref,-class=>'showStart',-id=>$first},
+			'&gt; slideshow')),"\n",
 		start_div({-id=>"slideshowWindow",-class=>"slideshowWindow"}),
 		div({-id=>"slideshowContainer",
 			-class=>"slideshowContainer"},""),
@@ -654,7 +652,7 @@ sub startimglist {
 			"Stop"),
 		a({-href=>"#",-onClick=>"show.next();return false;"},
 			"Next"),
-		a({-href=>"#",-onClick=>"stop_slideshow();return false;"},
+		a({-href=>"#",-onClick=>"showStop();return false;"},
 			"Exit"),
 		end_div,
 		end_div,
@@ -674,31 +672,33 @@ sub img_entry {
 	my $i=0+$self->{-parent}->{-numofimgs};
 	$self->{-parent}->{-numofimgs}++;
 
-	print $IND a({-name=>$i}),"\n",
+	print $IND a({-name=>$name}),"\n",
 		start_table({-class=>'slide'}),start_Tr,start_td,"\n",
 		div({-class=>'slidetitle',-id=>$name},
-			a({-href=>".html/$name-info.html?conceal",
+			"\n ",a({-href=>".html/$name-info.html",
 				-title=>'Image Info: '.$name,
 				-class=>'infoBox'},
-				$title)),"\n",
+				$title),"\n"),"\n",
 		div({-class=>'slideimage',-id=>$name},
-			a({-href=>".html/$name-static.html",-title=>$title,
-				-id=>$name,
-				-OnClick=>"return run_slideshow(".$i.");"},
-				img({-src=>$thumb}))),"\n",
-		start_div({-class=>'varimages',-id=>$i});
+			"\n ",a({-href=>".html/$name-static.html",
+				-title=>$title,
+				-class=>'showImage',
+				-id=>$name},
+				img({-src=>$thumb})),"\n"),"\n",
+		start_div({-class=>'varimages',-id=>$name}),"\n";
 	foreach my $sz(@sizes) {
 		my $src=$self->{$sz}->{'url'};
 		my $w=$self->{$sz}->{'dim'}->[0];
 		my $h=$self->{$sz}->{'dim'}->[1];
-		print $IND a({-href=>$src,-style=>"display: none;",
-			-class=>($sz == 640)?"slideshowThumbnail":"",
+		print $IND "  ",a({-href=>$src,
+			-class=>"conceal ".
+				(($sz == 640)?"slideshowThumbnail":""),
 			-title=>"Reduced to ".$w."x".$h},
-			$w."x".$h)," ";
+			$w."x".$h)," \n";
 	}
-	print $IND a({-href=>$name,
+	print $IND "  ",a({-href=>$name,
 				-title=>'Original'},$w."x".$h),
-		end_div,"\n",
+		"\n",end_div,"\n",
 		end_td,end_Tr,end_table,"\n";
 }
 

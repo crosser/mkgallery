@@ -17,15 +17,15 @@ var showWindow = new Class({
 			zIndex: 2,
 			container: document.body,
 			onClick: $empty,
-		};
+		}
 	},
 
 	initialize: function(div,options){
-		this.setOptions(this.getOptions(), options);
+		this.setOptions(this.getOptions(), options)
 
-		this.options.container = $(this.options.container);
+		this.options.container = $(this.options.container)
 
-		this.div = $(div);
+		this.div = $(div)
 		this.div.setStyles({
 			position: 'absolute',
 			left: '0px',
@@ -34,61 +34,81 @@ var showWindow = new Class({
 			zIndex: this.options.zIndex,
 			overflow: 'hidden',
 			display: 'none'
-		});
+		})
 		this.div.addEvent('click', function(){
-			this.options.onClick();
-		}.bind(this));
+			this.options.onClick()
+		}.bind(this))
 
-		this.position();
+		this.position()
 
-		window.addEvent('resize', this.position.bind(this));
-		window.addEvent('scroll', this.position.bind(this));
+		window.addEvent('resize', this.position.bind(this))
+		window.addEvent('scroll', this.position.bind(this))
 	},
 
 	position: function(){
 		if(this.options.container == document.body){
-			var h = window.getHeight()+'px';
-			var s = window.getScrollTop()+'px';
-			this.div.setStyles({top: s, height: h});
+			var h = window.getHeight()+'px'
+			var s = window.getScrollTop()+'px'
+			this.div.setStyles({top: s, height: h})
 		}else{
-			var myCoords = this.options.container.getCoordinates();
+			var myCoords = this.options.container.getCoordinates()
 			this.div.setStyles({
 				top: myCoords.top+'px',
 				height: myCoords.height+'px',
 				left: myCoords.left+'px',
 				width: myCoords.width+'px'
-			});
+			})
 		}
 	},
 
 	show: function(){
-		this.div.setStyles({display: 'block'});
+		this.div.setStyles({display: 'block'})
 	},
 
 	hide: function(){
-		this.div.setStyles({display: 'none'});
+		this.div.setStyles({display: 'none'})
 	}
-});
-showWindow.implement(new Options);
+})
+showWindow.implement(new Options)
 
 /* Make overlay window and start slideshow */
-function run_slideshow(startid) {
- showwin.show();
- show.stop();
- if (startid < 0) {
-  show.play(0);
- } else {
-  show.play(startid);
-  show.stop();
+function showImage(id,doplay) {
+ var i=rimgs[id]
+ /* alert('show id='+id+' index='+i+' doplay='+doplay) */
+ showwin.show()
+ show.play(i)
+ if (!doplay) {
+  show.stop()
  }
- return false;
+ return false
 }
 
 /* Stop slideshow and return to index page */
-function stop_slideshow() {
- show.stop();
- showwin.hide();
- return false;
+function showStop() {
+ show.stop()
+ showwin.hide()
+ /*
+ var img = show.newImage.getElement('img');
+ if(img) {
+  alert('remove element: '+img.get('tag')+'.'+img.get('class')+
+   '#'+img.get('id')+' src='+img.get('src'))
+  img.dispose()
+ }
+
+ img = show.oldImage.getElement('img');
+ if(img) {
+  alert('remove element: '+img.get('tag')+'.'+img.get('class')+
+   '#'+img.get('id')+' src='+img.get('src'))
+  img.dispose()
+ }
+
+ show.imagesHolder.getElements('img').each(function(el){
+  alert('remove element: '+el.get('tag')+'.'+el.get('class')+'#'+el.get('id')+
+   ' src='+el.get('src'))
+  el.dispose()
+ })
+ */
+ return false
 }
 
 /* List of lists of img variations. Each image variation is a three-element  */
@@ -103,16 +123,33 @@ var vimgs=[]
  *  ...
  * ]
 */
+/* resolve string ID to index */
+var rimgs=[]
+
 /* Initialize everything, to be called on domready */
 function init_gallery() {
- $$('div.varimages').each(function(el){
+ $$('.conceal').each(function(el){
+  el.setStyle('display', 'none')
+ })
+ $$('a.infoBox').each(function(el){
+  var url=el.get('href')
+  el.set('href',url+'?conceal')
+ })
+ $$('a.showStart').each(function(el){
+  el.addEvent('click', showImage.bind(el,[el.get('id'),1]))
+ })
+ $$('a.showImage').each(function(el){
+  el.addEvent('click', showImage.bind(el,[el.get('id'),0]))
+ })
+ $$('div.varimages').each(function(el,i){
   var id=el.id
-  vimgs[id]=[]
-  el.getElements('a').each(function(ael,i){
+  rimgs[id]=i
+  vimgs[i]=[]
+  el.getElements('a').each(function(ael,j){
    dim = /(\d+)[^\d](\d+)/.exec(ael.text)
    w = dim[1]
    h = dim[2]
-   vimgs[id][i]=[w,h,ael.href]
+   vimgs[i][j]=[w,h,ael.href]
   })
  })
    /* debugging output
@@ -147,16 +184,16 @@ function init_gallery() {
   wait: 3000,
   effect: 'fade',
   duration: 1000,
-  loop: true, 
+  loop: false, 
   thumbnails: true,
   onClick: function(i){alert(i)}
  }
  show = new slideShow('slideshowContainer','slideshowThumbnail',showparms)
 
  parsedurl = parseUrl(document.URL)
- // alert('Anchor: '+parsedurl['anchor']+'\nURL: '+document.URL)
+ /* alert('Anchor: '+parsedurl['anchor']+'\nURL: '+document.URL) */
  if ($chk(parsedurl['anchor'])){
-  run_slideshow(parsedurl['anchor'])
+  showImage(parsedurl['anchor'],0)
  }
 }
 
