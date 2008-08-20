@@ -524,13 +524,19 @@ sub makeaux {
 		my $imgsrc = sprintf("../.%s/%s",$sizes[0],$name);
 		print $F start_html(-title=>$title,
 				-encoding=>"utf-8",
-				-style=>{-src=>$inc."gallery.css"},),"\n",
+				-style=>{-src=>$inc."gallery.css"},
+				-script=>[
+					{-src=>$inc."mootools.js"},
+					{-src=>$inc."urlparser.js"},
+					{-src=>$inc."infopage.js"},
+				]),"\n",
 			start_center,"\n",
 			h1($title),"\n",
 			table({-class=>'ipage'},
 				Tr(td(img({-src=>$imgsrc})),
 					td($self->infotable))),
-			a({-href=>'../index.html'},'Index'),"\n",
+			a({-href=>'../index.html',-class=>'conceal'},
+				'Index'),"\n",
 			end_center,"\n",
 			end_html,"\n";
 		close($F);
@@ -671,8 +677,8 @@ sub img_entry {
 	print $IND a({-name=>$i}),"\n",
 		start_table({-class=>'slide'}),start_Tr,start_td,"\n",
 		div({-class=>'slidetitle',-id=>$name},
-			a({-href=>".html/$name-info.html",
-				-title=>'Image Info',
+			a({-href=>".html/$name-info.html?conceal",
+				-title=>'Image Info: '.$name,
 				-class=>'infoBox'},
 				$title)),"\n",
 		div({-class=>'slideimage',-id=>$name},

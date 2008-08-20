@@ -2,7 +2,7 @@
         This is a part of mkgallery.pl suite
         http://www.average.org/mkgallery/
 
-	Uses mootools (1.1) http://www.mootools.net/
+	Uses mootools (1.2) http://www.mootools.net/
 	Uses slideshow http://www.phatfusion.net/slideshow/
 */
 
