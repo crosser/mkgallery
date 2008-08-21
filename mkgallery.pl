@@ -638,25 +638,7 @@ sub startimglist {
 
 	print $IND h2("Images ",
 		a({-href=>$slideref,-class=>'showStart',-id=>$first},
-			'&gt; slideshow')),"\n",
-		start_div({-id=>"slideshowWindow",-class=>"slideshowWindow"}),
-		div({-id=>"slideshowContainer",
-			-class=>"slideshowContainer"},""),
-		start_div({-id=>"slideshowControls",
-			-class=>"slideshowControls"}),
-		a({-href=>"#",-onClick=>"show.previous();return false;"},
-			"Prev"),
-		a({-href=>"#",-onClick=>"show.play();return false;"},
-			"Play"),
-		a({-href=>"#",-onClick=>"show.stop();return false;"},
-			"Stop"),
-		a({-href=>"#",-onClick=>"show.next();return false;"},
-			"Next"),
-		a({-href=>"#",-onClick=>"showStop();return false;"},
-			"Exit"),
-		end_div,
-		end_div,
-		"\n";
+			'&gt; slideshow')),"\n";
 }
 
 sub img_entry {
@@ -685,7 +667,7 @@ sub img_entry {
 				-class=>'showImage',
 				-id=>$name},
 				img({-src=>$thumb})),"\n"),"\n",
-		start_div({-class=>'varimages',-id=>$name}),"\n";
+		start_div({-class=>'varimages',-id=>$name,-name=>$title}),"\n";
 	foreach my $sz(@sizes) {
 		my $src=$self->{$sz}->{'url'};
 		my $w=$self->{$sz}->{'dim'}->[0];

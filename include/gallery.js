@@ -14,19 +14,19 @@ var showWindow = new Class({
 
 	getOptions: function(){
 		return {
+			embed: [],
 			zIndex: 2,
 			container: document.body,
 			onClick: $empty,
 		}
 	},
 
-	initialize: function(div,options){
+	initialize: function(name,options){
 		this.setOptions(this.getOptions(), options)
 
 		this.options.container = $(this.options.container)
 
-		this.div = $(div)
-		this.div.setStyles({
+		this.container = new Element('div').addClass(name).setStyles({
 			position: 'absolute',
 			left: '0px',
 			top: '0px',
@@ -34,10 +34,17 @@ var showWindow = new Class({
 			zIndex: this.options.zIndex,
 			overflow: 'hidden',
 			display: 'none'
-		})
-		this.div.addEvent('click', function(){
+		}).addEvent('click', function(){
 			this.options.onClick()
-		}.bind(this))
+		}.bind(this)).injectInside(this.options.container);
+
+		this.options.embed.each(function(el){
+			var sub = new Element('div')
+			sub.addClass(el).setProperties({
+				id: el,
+				name: el,
+			}).injectInside(this.container)
+		},this)
 
 		this.position()
 
@@ -49,10 +56,10 @@ var showWindow = new Class({
 		if(this.options.container == document.body){
 			var h = window.getHeight()+'px'
 			var s = window.getScrollTop()+'px'
-			this.div.setStyles({top: s, height: h})
+			this.container.setStyles({top: s, height: h})
 		}else{
 			var myCoords = this.options.container.getCoordinates()
-			this.div.setStyles({
+			this.container.setStyles({
 				top: myCoords.top+'px',
 				height: myCoords.height+'px',
 				left: myCoords.left+'px',
@@ -62,18 +69,64 @@ var showWindow = new Class({
 	},
 
 	show: function(){
-		this.div.setStyles({display: 'block'})
+		this.container.setStyle('display', 'block')
 	},
 
 	hide: function(){
-		this.div.setStyles({display: 'none'})
+		this.container.setStyle('display', 'none')
 	}
 })
 showWindow.implement(new Options)
 
+var showControls = new Class({
+
+	getOptions: function(){
+		return {
+			next: $empty,
+			prev: $empty,
+			stop: $empty,
+			play: $empty,
+			exit: $empty,
+		}
+	},
+
+	initialize: function(name,options){
+		this.setOptions(this.getOptions(), options)
+
+		this.container = $(name)
+
+		var buttons = ['prev','stop','play','next','exit','comm']
+		buttons.each(function(el){
+			var sub = new Element('div')
+			if (el == 'comm') {
+				this.comm = sub
+				sub.set('text', 'this is a comment field')
+			/*
+			} else {
+				sub.set('text', el)
+			*/
+			}
+			if (this.options[el]) {
+				sub.addEvent('click', function() {
+					this.options[el]()
+				}.bind(this))
+			}
+			sub.addClass('controlButton').setProperties({
+				id: el,
+				name: el,
+			}).injectInside(this.container)
+		},this)
+	},
+
+	settext: function(text) {
+		this.comm.set(text)
+	}
+})
+showControls.implement(new Options)
+
 /* Make overlay window and start slideshow */
 function showImage(id,doplay) {
- var i=rimgs[id]
+ var i=rimgs[id][0]
  /* alert('show id='+id+' index='+i+' doplay='+doplay) */
  showwin.show()
  show.play(i)
@@ -85,7 +138,7 @@ function showImage(id,doplay) {
 
 /* Stop slideshow and return to index page */
 function showStop() {
- show.stop()
+ show.quit()
  showwin.hide()
  /*
  var img = show.newImage.getElement('img');
@@ -142,9 +195,8 @@ function init_gallery() {
   el.addEvent('click', showImage.bind(el,[el.get('id'),0]))
  })
  $$('div.varimages').each(function(el,i){
-  var id=el.id
-  rimgs[id]=i
-  vimgs[i]=[]
+  rimgs[el.id] = [i, el.title]
+  vimgs[i] = []
   el.getElements('a').each(function(ael,j){
    dim = /(\d+)[^\d](\d+)/.exec(ael.text)
    w = dim[1]
@@ -177,7 +229,10 @@ function init_gallery() {
  }
  ibox = new multiBox('infoBox', iboxparams)
 
- var winparms = {}
+ var winparms = {
+  /* onClick: showStop,  /* temporarily */
+  embed: ['slideshowContainer', 'slideshowControls'],
+ }
  showwin = new showWindow('slideshowWindow',winparms)
 
  var showparms = {
@@ -185,10 +240,19 @@ function init_gallery() {
   effect: 'fade',
   duration: 1000,
   loop: false, 
-  thumbnails: true,
+  thumbnails: false,
   onClick: function(i){alert(i)}
  }
- show = new slideShow('slideshowContainer','slideshowThumbnail',showparms)
+ show = new slideShow('slideshowContainer',vimgs,showparms)
+
+ var ctlparams = {
+  next: function(){show.next()},
+  prev: function(){show.previous()},
+  stop: function(){show.stop()},
+  play: function(){show.play()},
+  exit: function(){showStop()},
+ }
+ ctl = new showControls('slideshowControls',ctlparams)
 
  parsedurl = parseUrl(document.URL)
  /* alert('Anchor: '+parsedurl['anchor']+'\nURL: '+document.URL) */

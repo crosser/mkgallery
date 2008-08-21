@@ -53,6 +53,7 @@ var slideShow = new Class({
 			display: 'none'
 		}).injectInside(this.container);
 		
+		/*
 		if($type(images) == 'string' && !this.options.thumbnails){
 			var imageList = [];
 			$$('.'+images).each(function(el){
@@ -83,8 +84,11 @@ var slideShow = new Class({
 			}
 		
 		}else{
+		*/
 			this.images = images;
+		/*
 		}
+		*/
 		
 		this.loading = new Element('div').addClass(this.options.loadingCls).setStyles({
 			position: 'absolute',
@@ -117,18 +121,33 @@ var slideShow = new Class({
 		this.stopped = true;
 		this.started = false;
 		this.animating = false;
+		window.addEvent('resize', this.reshow.bind(this));
+		window.addEvent('scroll', this.reshow.bind(this));
 	},
 	
 	load: function(){
 		$clear(this.timer);
 		this.loading.setStyle('display','block');
 		this.image++;
-		var img = this.images[this.image];
+		var i;
+		var width;
+		var height;
+		var img;
+		for (i=0;i<this.images[this.image].length;i++) {
+			width = this.images[this.image][i][0];
+			height = this.images[this.image][i][1];
+			img = this.images[this.image][i][2];
+			if (width >= this.width || height >= this.height) {
+				break;
+			}
+		}
+		/* alert('req1 image '+img); */
 		delete this.imageObj;
 		
 		doLoad = true;
 		this.imagesHolder.getElements('img').each(function(el){
-			var src = this.images[this.image];
+			var src = this.images[this.image][i][2];
+			/* alert('req2 image '+src); */
 			if(el.src == src){
 				this.imageObj = el;
 				doLoad = false;
@@ -140,12 +159,42 @@ var slideShow = new Class({
 		if(doLoad){
 			this.add = true;
 			this.imageObj = new Asset.image(img, {onload: this.show.bind(this)});
+			this.imageObj.set('width', width).set('height', height);
 		}
 		
 	},
 
+	restyle: function(imgobj){
+		var width = imgobj.get('width');
+		var height = imgobj.get('height');
+		var vfactor = this.width/width;
+		var hfactor = this.height/height;
+		var factor = 1;
+		if (vfactor < factor) { factor = vfactor; }
+		if (hfactor < factor) { factor = hfactor; }
+		factor *= .95;
+		height = Math.round(height * factor);
+		width = Math.round(width * factor);
+		var topoff = (this.height - height)/2;
+		var leftoff = (this.width - width)/2;
+		/* alert('dim: '+width+'x'+height+'+'+leftoff+'+'+topoff); */
+		imgobj.setStyles({
+			position: 'absolute',
+			top: topoff,
+			left: leftoff,
+			width: width,
+			height: height,
+		});
+	},
+
 	show: function(add){
 		
+		this.restyle(this.imageObj);
+		var oimg = this.oldImage.getElement('img');
+		if (oimg) {
+			this.restyle(oimg);
+		}
+
 		if(this.add){
 			this.imageObj.injectInside(this.imagesHolder);
 		}
@@ -162,23 +211,9 @@ var slideShow = new Class({
 			var obj = this.imageObj.clone();
 			obj.injectInside(this.newImage);
 		}
+
 		this.imageLoaded = this.image;
 		this.loading.setStyle('display','none');
-		if(this.options.thumbnails){
-			
-			if(this.options.backgroundSlider){
-				var elT = this.thumbnailImages[this.image];
-				this.bgSlider.move(elT);
-				this.bgSlider.setStart(elT);
-			}else{
-				this.thumbnails.each(function(el,i){
-					el.removeClass(this.options.thumbnailCls);
-					if(i == this.image){
-						el.addClass(this.options.thumbnailCls);
-					}
-				},this);
-			}
-		}
 		this.effect();
 	},
 	
@@ -187,6 +222,7 @@ var slideShow = new Class({
 	},
 	
 	play: function(num){
+		this.position();
 		if(this.stopped){
 			if(num > -1){this.image = num-1};
 			if(this.image < this.images.length){
@@ -204,6 +240,16 @@ var slideShow = new Class({
 	stop: function(){
 		$clear(this.timer);
 		this.stopped = true;
+	},
+
+	quit: function(){
+		this.stop();
+	/* does not work */
+		var oimg = this.oldImage.getElement('img');
+		if (oimg) {
+			oimg.dispose();
+			delete oimg;
+		}
 	},
 	
 	next: function(wait){
@@ -316,28 +362,28 @@ var slideShow = new Class({
 	
 	setup: function(dir){
 		if(dir == 'top'){
-			this.top = -this.container.getStyle('height').toInt();
+			this.top = -this.height;
 			this.left = 0;
-			this.topOut = this.container.getStyle('height').toInt();
+			this.topOut = this.height;
 			this.leftOut = 0;
 			
 		}else if(dir == 'right'){
 			this.top = 0;
-			this.left = this.container.getStyle('width').toInt();
+			this.left = this.width;
 			this.topOut = 0;
-			this.leftOut = -this.container.getStyle('width').toInt();
+			this.leftOut = -this.width;
 			
 		}else if(dir == 'bottom'){
-			this.top = this.container.getStyle('height').toInt();
+			this.top = this.height;
 			this.left = 0;
-			this.topOut = -this.container.getStyle('height').toInt();
+			this.topOut = -this.height;
 			this.leftOut = 0;
 			
 		}else if(dir == 'left'){
 			this.top = 0;
-			this.left = -this.container.getStyle('width').toInt();
+			this.left = -this.width;
 			this.topOut = 0;
-			this.leftOut = this.container.getStyle('width').toInt();
+			this.leftOut = this.width;
 			
 		}else{
 			this.top = 0;
@@ -389,7 +435,24 @@ var slideShow = new Class({
 	
 	resetAnimation: function(){
 		this.animating = false;
-	}
+	},
+
+	position: function(){
+		var myCoords = this.container.getCoordinates();
+		this.width = myCoords.width;
+		this.height = myCoords.height;
+		/*
+		this.width = this.container.getStyle('width').toInt();
+		this.height = this.container.getStyle('height').toInt();
+		*/
+		/* alert('container dim: '+this.width+'x'+this.height); */
+	},
+
+	reshow: function(){
+		this.position();
+		this.image--;
+		this.load();
+	},
 	
 });
 slideShow.implement(new Options);
