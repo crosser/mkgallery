@@ -29,7 +29,7 @@ title for this album.  Two subdirectories are created with scaled down
 versions of the images: ".640" and ".160", and a direcotory named ".html"
 containging slideshow pages (and info pages for non-javascript clients).
 
-For the thing to work, you must create a subdirectory named ".include"
+For the thing to work, you must create a subdirectory named ".gallery2"
 at the root of your image gallery, or somewhere upstairs in the
 document tree, and put there files from the subdirectory "include"
 of this distribution.  Then, chdir to the root of your gallery and run
@@ -42,12 +42,15 @@ script like "mkindex.pl".
 
 command-line options:
  --help:	print help message and exit
- --incpath:	do not try to find .include diretory upstream, use
+ --incpath:	do not try to find .gallery2 diretory upstream, use
 		specified path (absolute or relavive).  Use with causion.
  --debug:	print a lot of debugging info to stdout as you run
  --asktitle:	ask to edit album titles even if there are ".title" files
  --noasktitle:	don't ask to enter album titles even where ".title"
 		files are absent.  Use partial directory names as titles.
+ --rssfile:	partial name of rss file. Must be reachable from the
+		current directory or from one of upper directories.
+		First must be created with mkgalrss.pl script.
 
 The only way to specify titles for individual pictures is to write
 comments into the image files.

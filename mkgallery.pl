@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id$
+my $version='$Id$';
 
 # Recursively create image gallery index and slideshow wrappings.
 # Makes use of modified "slideshow" javascript by Samuel Birch
@@ -489,14 +489,16 @@ sub makeaux {
 					-head=>meta({-http_equiv=>'Refresh',
 						-content=>"3; url=$fwdref"}),
 					-style=>{-src=>$inc."gallery.css"},
-					),"\n";
+					),"\n",
+					comment("Created by ".$version),"\n";
 						
 			} else {
 				print $F start_html(-title=>$title,
 					-encoding=>"utf-8",
 					-bgcolor=>"#808080",
 					-style=>{-src=>$inc."gallery.css"},
-					),"\n";
+					),"\n",
+					comment("Created by ".$version),"\n";
 			}
 			print $F start_table({-class=>'navi'}),start_Tr,"\n",
 				td(a({-href=>"../index.html"},"Index")),"\n",
@@ -530,6 +532,7 @@ sub makeaux {
 					{-src=>$inc."urlparser.js"},
 					{-src=>$inc."infopage.js"},
 				]),"\n",
+			comment("Created by ".$version),"\n",
 			start_center,"\n",
 			h1($title),"\n",
 			table({-class=>'ipage'},
@@ -577,7 +580,8 @@ sub startindex {
 				{-src=>$inc."slideshow.js"},
 				{-src=>$inc."gallery.js"},
 				{-code=>"var incPrefix='$inc';"}
-			]),
+			]),"\n",
+		comment("Created by ".$version),"\n",
 		a({-href=>"../index.html"},"UP"),"\n",
 		start_center,"\n",
 		h1($title),"\n",
