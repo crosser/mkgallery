@@ -74,13 +74,14 @@ if ($rssfile && ! $haverssxml) {
 my $term = new Term::ReadLine "Edit Title";
 
 FsObj->new(getcwd)->iterate;
+if ($rssobj) { $rssobj->{'rss'}->save($rssobj->{'file'}); }
 
 sub help {
 
 	print STDERR <<__END__;
 usage: $0 [options]
  --help:        print help message and exit
- --incpath:     do not try to find .include diretory upstream, use
+ --incpath:     do not try to find .gallery2 diretory upstream, use
                 specified path (absolute or relavive).  Use with causion.
  --debug:       print a lot of debugging info to stdout as you run
  --asktitle:    ask to edit album titles even if there are ".title" files
@@ -134,10 +135,10 @@ sub getinc {
 	my $depth=20;		# arbitrary max depth
 
 	if ($incpath) {
-		return $incpath."/.include";
+		return $incpath."/.gallery2";
 	}
 
-	my $inc=".include";
+	my $inc=".gallery2";
 	while ( ! -d $fullpath."/".$inc ) {
 		$inc = "../".$inc;
 		last unless ($depth-- > 0);
@@ -673,8 +674,7 @@ sub img_entry {
 		my $w=$self->{$sz}->{'dim'}->[0];
 		my $h=$self->{$sz}->{'dim'}->[1];
 		print $IND "  ",a({-href=>$src,
-			-class=>"conceal ".
-				(($sz == 640)?"slideshowThumbnail":""),
+			-class=>"conceal",
 			-title=>"Reduced to ".$w."x".$h},
 			$w."x".$h)," \n";
 	}

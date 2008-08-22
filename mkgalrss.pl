@@ -48,13 +48,8 @@ sub help {
 	print STDERR <<__END__;
 usage: $0 [options]
  --help:        print help message and exit
- --incpath:     do not try to find .include diretory upstream, use
-                specified path (absolute or relavive).  Use with causion.
  --debug:       print a lot of debugging info to stdout as you run
- --asktitle:    ask to edit album titles even if there are ".title" files
- --noasktitle:  don't ask to enter album titles even where ".title"
-                files are absent.  Use partial directory names as titles.
- --rssfile=...:	build RSS feed for newly added "albums", give name of rss file
+ --rssfile=...:	name of the rss file to create
 __END__
 
 	exit 1;
@@ -78,6 +73,8 @@ my $link = $term->readline('Gallery root URL >','');
 $term->addhistory($link) if ($link);
 my $desc = $term->readline('Gallery description >','');
 $term->addhistory($desc) if ($desc);
+
+$link .= '/' unless ($link =~ m%/$%);
 
 $rssobj->channel(
 		title=>$title,
