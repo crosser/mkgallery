@@ -579,7 +579,6 @@ sub startindex {
 				{-src=>$inc."multibox.js"},
 				{-src=>$inc."slideshow.js"},
 				{-src=>$inc."gallery.js"},
-				{-code=>"var incPrefix='$inc';"}
 			]),"\n",
 		comment("Created by ".$version),"\n",
 		a({-href=>"../index.html"},"UP"),"\n",
