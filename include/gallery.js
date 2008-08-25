@@ -26,7 +26,11 @@ var showWindow = new Class({
 
 		this.options.container = $(this.options.container)
 
-		this.container = new Element('div').addClass(name).setStyles({
+		this.container = new Element('div').addClass(name).
+		setProperties({
+			id: name,
+			name: name,
+		}).setStyles({
 			position: 'absolute',
 			left: '0px',
 			top: '0px',
@@ -38,12 +42,14 @@ var showWindow = new Class({
 			this.options.onClick()
 		}.bind(this)).injectInside(this.options.container);
 
+		this.embedded = []
 		this.options.embed.each(function(el){
 			var sub = new Element('div')
 			sub.addClass(el).setProperties({
 				id: el,
 				name: el,
 			}).injectInside(this.container)
+			this.embedded.push(sub)
 		},this)
 
 		this.position()
@@ -54,18 +60,17 @@ var showWindow = new Class({
 
 	position: function(){
 		if(this.options.container == document.body){
-			var h = window.getHeight()+'px'
-			var s = window.getScrollTop()+'px'
-			this.container.setStyles({top: s, height: h})
+			this.h = window.getHeight()
+			this.s = window.getScrollTop()
 		}else{
 			var myCoords = this.options.container.getCoordinates()
-			this.container.setStyles({
-				top: myCoords.top+'px',
-				height: myCoords.height+'px',
-				left: myCoords.left+'px',
-				width: myCoords.width+'px'
-			})
+			this.h = myCoords.height
+			this.s = myCoords.top
 		}
+		this.container.setStyles({
+			top: this.s+'px',
+			height: this.h+'px'
+		})
 	},
 
 	show: function(){
@@ -231,9 +236,9 @@ function init_gallery() {
 
  var winparms = {
   /* onClick: showStop,  /* temporarily */
-  embed: ['slideshowContainer', 'slideshowControls'],
+  embed: ['slideshowControls'],
  }
- showwin = new showWindow('slideshowWindow',winparms)
+ showwin = new showWindow('slideshowContainer',winparms)
 
  var showparms = {
   wait: 3000,

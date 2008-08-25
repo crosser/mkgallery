@@ -33,7 +33,7 @@ var slideShow = new Class({
 		
 		this.container = $(container);
 		this.container.setStyles({
-			position: 'relative',
+			/* position: 'relative', */
 			overflow: 'hidden'
 		});
 		if(this.options.onClick){
@@ -173,8 +173,10 @@ var slideShow = new Class({
 		if (vfactor < factor) { factor = vfactor; }
 		if (hfactor < factor) { factor = hfactor; }
 		factor *= .95;
-		height = Math.round(height * factor);
-		width = Math.round(width * factor);
+		if (factor < 1) {
+			height = Math.round(height * factor);
+			width = Math.round(width * factor);
+		}
 		var topoff = (this.height - height)/2;
 		var leftoff = (this.width - width)/2;
 		/* alert('dim: '+width+'x'+height+'+'+leftoff+'+'+topoff); */
