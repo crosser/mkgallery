@@ -103,14 +103,6 @@ var showControls = new Class({
 		var buttons = ['prev','stop','play','next','exit','comm']
 		buttons.each(function(el){
 			var sub = new Element('div')
-			if (el == 'comm') {
-				this.comm = sub
-				sub.set('text', 'this is a comment field')
-			/*
-			} else {
-				sub.set('text', el)
-			*/
-			}
 			if (this.options[el]) {
 				sub.addEvent('click', function() {
 					this.options[el]()
@@ -123,15 +115,12 @@ var showControls = new Class({
 		},this)
 	},
 
-	settext: function(text) {
-		this.comm.set(text)
-	}
 })
 showControls.implement(new Options)
 
 /* Make overlay window and start slideshow */
 function showImage(id,doplay) {
- var i=rimgs[id][0]
+ var i=rimgs[id]
  /* alert('show id='+id+' index='+i+' doplay='+doplay) */
  showwin.show()
  show.play(i)
@@ -200,13 +189,13 @@ function init_gallery() {
   el.addEvent('click', showImage.bind(el,[el.get('id'),0]))
  })
  $$('div.varimages').each(function(el,i){
-  rimgs[el.id] = [i, el.title]
+  rimgs[el.id] = i
   vimgs[i] = []
   el.getElements('a').each(function(ael,j){
    dim = /(\d+)[^\d](\d+)/.exec(ael.text)
    w = dim[1]
    h = dim[2]
-   vimgs[i][j]=[w,h,ael.href]
+   vimgs[i][j]=[w,h,ael.href,el.id,el.title]
   })
  })
    /* debugging output
@@ -246,7 +235,8 @@ function init_gallery() {
   duration: 1000,
   loop: false, 
   thumbnails: false,
-  onClick: function(i){alert(i)}
+  onClick: function(i){alert(i)},
+  comment: 'comm',
  }
  show = new slideShow('slideshowContainer',vimgs,showparms)
 

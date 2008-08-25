@@ -105,36 +105,45 @@ table.picframe {
 }
 
 .controlButton#prev {
- left: 0px;
+ left: 3px;
  background: url(left.png) no-repeat;
 }
 
 .controlButton#stop {
- left: 25px;
+ left: 28px;
  background: url(stop.png) no-repeat;
 }
 
 .controlButton#play {
- left: 50px;
+ left: 53px;
  background: url(play.png) no-repeat;
 }
 
 .controlButton#next {
- left: 75px;
+ left: 78px;
  background: url(right.png) no-repeat;
 }
 
 .controlButton#exit {
- left: 100px;
+ left: 103px;
  background: url(close.png) no-repeat;
 }
 
 .controlButton#comm {
- left: 125px;
+ left: 128px;
  width: auto;
- color: white;
- margin: .3ex;
+ font-size: 20px;
+ margin-left: .5ex;
+ margin-right: .5ex;
+ padding-left: .5ex;
+ padding-right: .5ex;
+ background-color: rgba(0,0,0,.5);
  cursor: default;
+}
+
+.controlButton#comm a {
+ color: white;
+ text-decoration: none;
 }
 
 .MultiBoxContainer {

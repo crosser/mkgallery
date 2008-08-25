@@ -24,7 +24,8 @@ var slideShow = new Class({
 			thumbnailCls: 'outline',
 			backgroundSlider: false, //change to be an instance.
 			loadingCls: 'loading',
-			onClick: false
+			onClick: false,
+			comment: null,
 		};
 	},
 
@@ -41,8 +42,8 @@ var slideShow = new Class({
 				this.options.onClick(this.imageLoaded);
 			}.bind(this));
 		}
-		
-		
+		this.comm=this.options.comment;
+
 		this.imagesHolder = new Element('div').setStyles({
 			position: 'absolute',
 			overflow: 'hidden',
@@ -161,7 +162,8 @@ var slideShow = new Class({
 			this.imageObj = new Asset.image(img, {onload: this.show.bind(this)});
 			this.imageObj.set('width', width).set('height', height);
 		}
-		
+		this.imageObj.set('id', this.images[this.image][i][3]);
+		this.imageObj.set('title', this.images[this.image][i][4]);
 	},
 
 	restyle: function(imgobj){
@@ -217,6 +219,15 @@ var slideShow = new Class({
 		this.imageLoaded = this.image;
 		this.loading.setStyle('display','none');
 		this.effect();
+		this.comm = $(this.comm);
+		if (this.comm) {
+			var a = this.comm.getElement('a');
+			if (a) a.dispose();
+			a = new Element('a', {
+				href: '#'+this.imageObj.get('id'),
+				html: this.imageObj.get('title'),
+			}).injectInside(this.comm);
+		}
 	},
 	
 	wait: function(){
@@ -437,6 +448,9 @@ var slideShow = new Class({
 	
 	resetAnimation: function(){
 		this.animating = false;
+		this.oldImage.setStyles({
+			opacity: 0
+		});
 	},
 
 	position: function(){

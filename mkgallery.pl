@@ -671,7 +671,7 @@ sub img_entry {
 				-class=>'showImage',
 				-id=>$name},
 				img({-src=>$thumb})),"\n"),"\n",
-		start_div({-class=>'varimages',-id=>$name,-name=>$title}),"\n";
+		start_div({-class=>'varimages',-id=>$name,-title=>$title}),"\n";
 	foreach my $sz(@sizes) {
 		my $src=$self->{$sz}->{'url'};
 		my $w=$self->{$sz}->{'dim'}->[0];
