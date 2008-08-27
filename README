@@ -65,12 +65,33 @@ Requirements:
 Image::Info
 Image::Magick (optional. If not present, will run djeg|pnmscale|cjpeg pipe)
 Term::ReadLine
+XML::RSS (optional. If not present, will refuse to make RSS feed)
 
 Homepage:
 http://www.average.org/mkgallery/
 
 TODO:
 - make index.html depend of .title and directory timestamps
-- any ideas?
+- new javascript slideshow:
+  - On show image: find this and next urls; put in place
+    those that are already here; free unneeded; initiate download of
+    the rest; if needed image is ready then initiate "transitioning", else
+    initiate "loading".
+  - On load complete: if this is the target image, initiate "transitioning".
+  - On "loading": show "loading" image
+  - On "transitioning": hide "loading" image; initiate FX animation to the
+    needed image.
+  - On animation complete: blank previous image; if "playing" then schedule
+    autoswitch to next image in the future.
+  - On autoswitch to next image: if "playing" then switch to next image.
+  - On switch to next image: if next exists, show next image, else show
+    "last image" message.
+  - On switch to prev image: if prev exists, show prev image, else show
+    "first image" message.
+  - On "play": make "playing"; switch to next image.
+  - On "stop": if "playing" cancel autoswitch; break "playing".
+  - On "start show": set up things; set "playing" state; show needed image.
+  - On "stop show": cancel any schedules, hide things.
+- make "controls" and "slideshow" two "co-routine" style classes.
 
 Eugene Crosser <crosser at average dot org>
