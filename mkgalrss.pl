@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: mkgallery.pl 38 2006-12-17 09:39:01Z crosser $
+# $Id$
 
 # Build initial (empty) RSS file for mkgallery.pl
 
