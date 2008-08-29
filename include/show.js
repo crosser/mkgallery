@@ -36,8 +36,8 @@ var Show = new Class({
 
 	getOptions: function(){
 		return {
-			onClick: $empty,
-			exit: function(){ alert('show exit undefined'); },
+			cbStart: function(){ alert('show start undefined'); },
+			cbExit: function(){ alert('show exit undefined'); },
 		}
 	},
 
@@ -82,8 +82,14 @@ var Show = new Class({
 				'<ref>','next called');
 	},
 
+	start: function(id, play){
+		this.options.cbStart();
+		/* real job here */
+		return false; /* tao make it usable from href links */
+	},
+
 	exit: function(){
-		this.options.exit();
+		this.options.cbExit();
 	},
 
 	comm: function(){

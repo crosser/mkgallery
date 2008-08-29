@@ -577,10 +577,14 @@ sub startindex {
 				{-src=>$inc."overlay.js"},
 				{-src=>$inc."urlparser.js"},
 				{-src=>$inc."multibox.js"},
-				{-src=>$inc."slideshow.js"},
+				{-src=>$inc."showwin.js"},
+				{-src=>$inc."controls.js"},
+				{-src=>$inc."show.js"},
 				{-src=>$inc."gallery.js"},
 			]),"\n",
 		comment("Created by ".$version),"\n",
+		start_div({-class => 'indexContainer',
+				-id => 'indexContainer'}),
 		a({-href=>"../index.html"},"UP"),"\n",
 		start_center,"\n",
 		h1($title),"\n",
@@ -591,7 +595,7 @@ sub endindex {
 	my $self = shift;
 	my $IND = $self->{-IND};
 
-	print $IND end_center,end_html,"\n";
+	print $IND end_center,end_div,end_html,"\n";
 
 	close($IND) if ($IND);
 	undef $self->{-IND};

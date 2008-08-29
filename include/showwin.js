@@ -18,6 +18,7 @@ var showWindow = new Class({
 		return {
 			zIndex: 2,
 			container: document.body,
+			tohide: '',
 			onClick: $empty,
 		}
 	},
@@ -26,6 +27,7 @@ var showWindow = new Class({
 		this.setOptions(this.getOptions(), options);
 
 		this.options.container = $(this.options.container);
+		this.options.tohide = $(this.options.tohide);
 
 		this.container = new Element('div').addClass(name).
 		setProperties({
@@ -65,10 +67,16 @@ var showWindow = new Class({
 	},
 
 	show: function(){
+		if (this.options.tohide) {
+			this.options.tohide.setStyle('display', 'none');
+		}
 		this.container.setStyle('display', 'block');
 	},
 
 	hide: function(){
+		if (this.options.tohide) {
+			this.options.tohide.setStyle('display', 'block');
+		}
 		this.container.setStyle('display', 'none');
 	}
 })

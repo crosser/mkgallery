@@ -60,7 +60,7 @@ var Controls = new Class({
 			id: 'controlPosition',
 		}).injectInside(this.commbox);
 		this.refbox = new Element('a', {
-			href: 'javascript: void();',
+			href: 'javascript: void(1);',
 			html: 'title',
 		}).addClass('controlRef').setProperties({
 			id: 'controlRef',
