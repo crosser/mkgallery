@@ -112,6 +112,12 @@ table.picframe {
  background: url(left.png) no-repeat;
 }
 
+.controlButton#prevDisabled {
+ left: 3px;
+ background: url(leftDisabled.png) no-repeat;
+ cursor: default;
+}
+
 .controlButton#stop {
  left: 28px;
  background: url(stop.png) no-repeat;
@@ -125,6 +131,12 @@ table.picframe {
 .controlButton#next {
  left: 53px;
  background: url(right.png) no-repeat;
+}
+
+.controlButton#nextDisabled {
+ left: 53px;
+ background: url(rightDisabled.png) no-repeat;
+ cursor: default;
 }
 
 .controlButton#exit {
@@ -145,7 +157,14 @@ table.picframe {
 }
 
 .controlButton#comm a {
+ color: white;
  text-decoration: none;
+}
+
+.controlPosition {
+ vertical-align: middle;
+ font-size: 10px;
+ margin-right: 1ex;
 }
 
 .MultiBoxContainer {

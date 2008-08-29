@@ -28,7 +28,6 @@ var Controls = new Class({
 			onClick: $empty,
 			zIndex: 3,
 			buttonClass: 'controlButton',
-			buttons: ['prev','stop','play','next','exit','comm'],
 		}
 	},
 
@@ -44,7 +43,8 @@ var Controls = new Class({
 		}).addEvent('click', function(){
 			this.options.onClick()
 		}.bind(this)).injectInside(this.parent);
-		this.options.buttons.each(function(el){
+		var buttons = ['prev','stop','play','next','exit','comm'];
+		buttons.each(function(el){
 			var sub = new Element('div');
 			sub.addClass(this.options.buttonClass).setProperties({
 				id: el,
@@ -72,6 +72,7 @@ var Controls = new Class({
 	},
 
 	prev: function(){
+		if (this.prevdisabled) { return; }
 		if (this.show.prev) { this.show.prev() }
 		else { alert('no method for "prev", file complaint with UN') }
 	},
@@ -87,6 +88,7 @@ var Controls = new Class({
 	},
 
 	next: function(){
+		if (this.nextdisabled) { return; }
 		if (this.show.next) { this.show.next() }
 		else { alert('no method for "next", file complaint with UN') }
 	},
@@ -102,10 +104,24 @@ var Controls = new Class({
 	},
 
 	info: function(pos, max, ref, txt){
-		var msg = 'pos='+pos+', max='+max+', ref='+ref+', txt='+txt;
+		var p1 = pos + 1;
 		this.refbox.set('html',txt);
 		this.refbox.set('href',ref);
-		this.posbox.set('text',pos+' of '+max);
+		this.posbox.set('text',p1+' of '+max);
+		if (p1 < 2) {
+			this.prevbox.set('id', 'prevDisabled');
+			this.prevdisabled = true;
+		} else {
+			this.prevbox.set('id', 'prev');
+			this.prevdisabled = false;
+		}
+		if (p1 >= max) {
+			this.nextbox.set('id', 'nextDisabled');
+			this.nextdisabled = true;
+		} else {
+			this.nextbox.set('id', 'next');
+			this.nextdisabled = false;
+		}
 	},
 
 	running: function(isrunning){
