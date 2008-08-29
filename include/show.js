@@ -30,6 +30,9 @@
   - On "stop": if "playing" cancel autoswitch; break "playing".
   - On "start show": set up things; set "playing" state; show needed image.
   - On "stop show": cancel any schedules, hide things.
+  - On resize: recalculate existing image size and position; determine
+    what image is needed; if it is not the one on display then request
+    "show image" for the new image.
 */
 
 var Show = new Class({
