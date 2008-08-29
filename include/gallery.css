@@ -92,6 +92,7 @@ table.picframe {
  height: 30px;
  z-index: 3;
  opacity: .15;
+ color: white;
 }
 
 .slideshowControls:hover {
@@ -117,22 +118,22 @@ table.picframe {
 }
 
 .controlButton#play {
- left: 53px;
+ left: 28px;
  background: url(play.png) no-repeat;
 }
 
 .controlButton#next {
- left: 78px;
+ left: 53px;
  background: url(right.png) no-repeat;
 }
 
 .controlButton#exit {
- left: 103px;
+ left: 78px;
  background: url(close.png) no-repeat;
 }
 
 .controlButton#comm {
- left: 128px;
+ left: 103px;
  width: auto;
  font-size: 20px;
  margin-left: .5ex;
@@ -144,7 +145,6 @@ table.picframe {
 }
 
 .controlButton#comm a {
- color: white;
  text-decoration: none;
 }
 

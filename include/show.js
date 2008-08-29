@@ -37,6 +37,7 @@ var Show = new Class({
 	getOptions: function(){
 		return {
 			onClick: $empty,
+			exit: function(){ alert('show exit undefined'); },
 		}
 	},
 
@@ -59,6 +60,37 @@ var Show = new Class({
 		alert('show.scroller called');
 	},
 
+	prev: function(){
+		this.controls.info(-1,this.vimgs.length,
+				'<ref>','prev called');
+	},
+
+	stop: function(){
+		this.controls.info(0,this.vimgs.length,
+				'<ref>','stop called');
+		this.controls.running(0);
+	},
+
+	play: function(){
+		this.controls.info(999,this.vimgs.length,
+				'<ref>','play called');
+		this.controls.running(1);
+	},
+
+	next: function(){
+		this.controls.info(1,this.vimgs.length,
+				'<ref>','next called');
+	},
+
+	exit: function(){
+		this.options.exit();
+	},
+
+	comm: function(){
+		alert('show.comm called, do nothing');
+	},
+
 });
 Show.implement(new Options);
+Show.implement(new Events);
 

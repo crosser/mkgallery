@@ -16,7 +16,6 @@ var showWindow = new Class({
 
 	getOptions: function(){
 		return {
-			embed: [],
 			zIndex: 2,
 			container: document.body,
 			onClick: $empty,
@@ -43,16 +42,6 @@ var showWindow = new Class({
 		}).addEvent('click', function(){
 			this.options.onClick()
 		}.bind(this)).injectInside(this.options.container);
-
-		this.embedded = [];
-		this.options.embed.each(function(el){
-			var sub = new Element('div');
-			sub.addClass(el).setProperties({
-				id: el,
-				name: el,
-			}).injectInside(this.container);
-			this.embedded.push(sub);
-		},this);
 
 		this.position();
 

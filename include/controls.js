@@ -26,36 +26,97 @@ var Controls = new Class({
 	getOptions: function(){
 		return {
 			onClick: $empty,
+			zIndex: 3,
+			buttonClass: 'controlButton',
+			buttons: ['prev','stop','play','next','exit','comm'],
 		}
 	},
 
-	initialize: function(container, options){
+	initialize: function(name, parent, options){
 		this.setOptions(this.getOptions(), options);
-		this.container = $(container);
-		var buttons = ['prev','stop','play','next','exit','comm'];
-		buttons.each(function(el){
+		this.parent = $(parent);
+		this.container = new Element('div').addClass(name).
+		setProperties({
+			id: name,
+			name: name,
+		}).setStyles({
+			zIndex: this.options.zIndex,
+		}).addEvent('click', function(){
+			this.options.onClick()
+		}.bind(this)).injectInside(this.parent);
+		this.options.buttons.each(function(el){
 			var sub = new Element('div');
-			sub.addClass('controlButton').setProperties({
+			sub.addClass(this.options.buttonClass).setProperties({
 				id: el,
 				name: el,
-			}).injectInside(this.container);
-			this[el] = sub;
+				title: el,
+			}).addEvent('click', function(){
+				this[el]();
+			}.bind(this)).injectInside(this.container);
+			this[el+'box'] = sub;
 		},this);
+		this.posbox = new Element('span').
+		addClass('controlPosition').setProperties({
+			id: 'controlPosition',
+		}).injectInside(this.commbox);
+		this.refbox = new Element('a', {
+			href: 'javascript: void();',
+			html: 'title',
+		}).addClass('controlRef').setProperties({
+			id: 'controlRef',
+		}).injectInside(this.commbox);
 	},
 
 	registershow: function(show){
-		alert('controls.registershow called');
 		this.show = show;
-		var buttons = ['prev','stop','play','next','exit'];
-		buttons.each(function(el){
-			var sub = new Element('div');
-			sub.addEvent('click', function() {
-				this.show[el]();
-			}.bind(this.show));
-		},this);
 	},
 
+	prev: function(){
+		if (this.show.prev) { this.show.prev() }
+		else { alert('no method for "prev", file complaint with UN') }
+	},
 
+	stop: function(){
+		if (this.show.stop) { this.show.stop() }
+		else { alert('no method for "stop", file complaint with UN') }
+	},
+
+	play: function(){
+		if (this.show.play) { this.show.play() }
+		else { alert('no method for "play", file complaint with UN') }
+	},
+
+	next: function(){
+		if (this.show.next) { this.show.next() }
+		else { alert('no method for "next", file complaint with UN') }
+	},
+
+	exit: function(){
+		if (this.show.exit) { this.show.exit() }
+		else { alert('no method for "exit", file complaint with UN') }
+	},
+
+	comm: function(){
+		if (this.show.comm) { this.show.comm() }
+		else { alert('no method for "comm", file complaint with UN') }
+	},
+
+	info: function(pos, max, ref, txt){
+		var msg = 'pos='+pos+', max='+max+', ref='+ref+', txt='+txt;
+		this.refbox.set('html',txt);
+		this.refbox.set('href',ref);
+		this.posbox.set('text',pos+' of '+max);
+	},
+
+	running: function(isrunning){
+		if (isrunning) {
+			this.playbox.setStyle('display', 'none');
+			this.stopbox.setStyle('display', 'block');
+		} else {
+			this.stopbox.setStyle('display', 'none');
+			this.playbox.setStyle('display', 'block');
+		}
+	},
 });
 Controls.implement(new Options);
 
