@@ -74,7 +74,5 @@ TODO:
 - make index.html depend of .title and directory timestamps
 - rebuild htmls in .html when directory timestamp chnges (images added)
 - make links in the rss file relative
-- new javascript slideshow:
-- make "controls" and "slideshow" two "co-routine" style classes.
 
 Eugene Crosser <crosser at average dot org>
