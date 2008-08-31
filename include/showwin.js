@@ -53,10 +53,12 @@ var showWindow = new Class({
 
 	position: function(){
 		if(this.options.container == document.body){
+			this.w = window.getWidth();
 			this.h = window.getHeight();
 			this.s = window.getScrollTop();
 		}else{
 			var myCoords = this.options.container.getCoordinates();
+			this.w = myCoords.width;
 			this.h = myCoords.height;
 			this.s = myCoords.top;
 		}
@@ -64,6 +66,14 @@ var showWindow = new Class({
 			top: this.s+'px',
 			height: this.h+'px'
 		})
+	},
+
+	getCoordinates: function(){
+		return {
+			width: this.w,
+			height: this.h,
+			top: this.s,
+		};
 	},
 
 	show: function(){

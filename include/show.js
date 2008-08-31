@@ -41,15 +41,38 @@ var Show = new Class({
 		return {
 			cbStart: function(){ alert('show start undefined'); },
 			cbExit: function(){ alert('show exit undefined'); },
+			percentage: 98,
+			delay: 5000,
 		}
 	},
 
 	initialize: function(vimgs, container, controls, options){
 		this.setOptions(this.getOptions(), options);
 		this.vimgs = vimgs;
-		this.container = $(container);
+		this.container = container;
 		this.controls = controls;
 		this.controls.registershow(this);
+		this.timer = 0;
+		this.delay = this.options.delay;
+		this.cache = {
+			prev: {},
+			curr: {},
+			next: {},
+		};
+		this.updatecoords();
+		this.previd = -1;
+		this.ondisplay = new Element('img').
+			injectInside(this.container.container);
+		this.loadingdiv = new Element('div').
+		addClass('loading').setStyles({
+			position: 'absolute',
+			top: 0,
+			left: 0,
+			zIndex: 3,
+			display: 'none',
+			width: this.coords.width,
+			height: this.coords.height,
+		}).injectInside(this.container.container);
 
 		window.addEvent('resize', this.resizer.bind(this))
 	},
@@ -57,34 +80,46 @@ var Show = new Class({
 	/* event handler for window resize */
 
 	resizer: function(){
-		alert('show.resizer called');
+		this.updatecoords();
+		var newstyle = this.calcsize(this.cache.curr);
+		this.ondisplay.setStyles(newstyle);
+		/* check if we need reload */
 	},
 
 	/* prev, play, stop, next, exit, comm are methods for button presses */
 
 	prev: function(){
-		this.controls.info(-1,this.vimgs.length,
-				'<ref>','prev called');
+		if (this.currentid > 0) {
+			this.show(this.currentid-1);
+		} else {
+			alert('show.prev called beyond first element');
+		}
 	},
 
 	stop: function(){
-		this.controls.info(0,this.vimgs.length,
-				'<ref>','stop called');
+		if (this.isplaying) { $clear(this.timer); }
+		this.isplaying = false;
+		$clear(this.timer);
 		this.controls.running(0);
 	},
 
 	play: function(){
-		this.controls.info(999,this.vimgs.length,
-				'<ref>','play called');
+		this.isplaying = true;
+		this.timer = this.autonext.delay(this.delay,this);
 		this.controls.running(1);
 	},
 
 	next: function(){
-		this.controls.info(1,this.vimgs.length,
-				'<ref>','next called');
+		if (this.currentid < this.vimgs.length-1) {
+			this.show(this.currentid+1);
+		} else {
+			alert('show.next called beyond last element');
+		}
 	},
 
 	exit: function(){
+		if (this.isplaying) { $clear(this.timer); }
+		this.stopfx();
 		this.options.cbExit();
 	},
 
@@ -96,12 +131,157 @@ var Show = new Class({
 
 	start: function(id, play){
 		this.options.cbStart();
-		alert('starting at '+id+', play='+play);
-		/* real job here */
+		this.isplaying = play;
+		this.controls.running(this.isplaying);
+		this.show(id);
 		return false; /* to make it usable from href links */
 	},
 
 	/* "Private" methods to do the real job */
+
+	show: function(id){
+		/* alert('called show.show('+id+')'); */
+		this.previd = this.currentid;
+		this.currentid = id;
+		var newcache = {
+			prev: (id > 0)?this.prepare(id-1):{},
+			curr: this.prepare(id),
+			next: (id < (this.vimgs.length-1))?this.prepare(id+1):{},
+		};
+		delete this.cache;
+		this.cache = newcache;
+		if (this.cache.curr.ready) {
+			this.display(this.cache.curr);
+		} else {
+			this.pendingload = true;
+			this.showloading();
+		}
+		this.controls.info(id,this.vimgs.length,
+				this.vimgs[id][0],
+				this.vimgs[id][1]);
+	},
+
+	prepare: function(id){
+		var vi;
+		for (vi=0;vi<this.vimgs[id][2].length-1;vi++) {
+			if ((this.vimgs[id][2][vi][0] >= this.target.width) ||
+			    (this.vimgs[id][2][vi][1] >= this.target.height)) {
+				break;
+			}
+		}
+		/* alert('prepare id='+id+', selected '+vi+' at '+
+			this.vimgs[id][2][vi][0]+'x'+
+			this.vimgs[id][2][vi][1]); */
+		var cachel;
+		['prev', 'curr', 'next'].each(function(el){
+			if (this.cache[el] &&
+			    this.cache[el].id == id &&
+			    this.cache[el].vi == vi) {
+				cachel = this.cache[el];
+			}
+		}.bind(this));
+		if (! cachel) {
+			cachel = {
+				id: id,
+				vi: vi,
+				ready: false,
+				url: this.vimgs[id][2][vi][2],
+			};
+			cachel.img = this.bgload(cachel);
+		}
+		return cachel;
+	},
+
+	bgload: function(cachel){
+		/* alert('bgload: id='+cachel.id+' vi='+cachel.vi+
+			' url='+cachel.url); */
+		return new Asset.image(this.vimgs[cachel.id][2][cachel.vi][2],{
+			id: this.vimgs[cachel.id][0],
+			title: this.vimgs[cachel.id][1],
+			onload: this.loadcomplete.bind(this,[cachel]),
+		});
+	},
+
+	loadcomplete: function(cachel){
+		/* alert('loadcomplete '+cachel.url+' id='+cachel.id+
+			' vi='+cachel.vi); */
+		cachel.ready = true;
+		if (cachel.id == this.currentid &&
+		    this.pendingload) {
+			this.pendingload = false;
+			this.hideloading();
+			this.display(cachel);
+		}
+	},
+
+	display: function(cachel){
+		var newstyle = this.calcsize(cachel);
+		var newimg = cachel.img.clone();
+		newimg.setStyles(newstyle);
+		newimg.replaces(this.ondisplay);
+		this.ondisplay = newimg;
+		if (this.isplaying) {
+			this.timer = this.autonext.delay(this.delay,this);
+		}
+	},
+
+	autonext: function(){
+		if (this.isplaying) {
+			if (this.currentid < this.vimgs.length-1) {
+				this.show(this.currentid+1);
+			} else {
+				this.exit();
+			}
+		}
+	},
+
+	calcsize: function(cachel){
+		var factor = 1;
+		var candidate;
+		candidate = this.target.width /
+				this.vimgs[cachel.id][2][cachel.vi][0];
+		if (factor > candidate) { factor = candidate; }
+		candidate = this.target.height /
+				this.vimgs[cachel.id][2][cachel.vi][1];
+		if (factor > candidate) { factor = candidate; }
+		var w = Math.round(this.vimgs[cachel.id][2][cachel.vi][0] *
+			factor);
+		var h = Math.round(this.vimgs[cachel.id][2][cachel.vi][1] *
+			factor);
+		var t = Math.round((this.coords.height-h)/2);
+		var l = Math.round((this.coords.width-w)/2);
+		/* alert('new size: '+w+'x'+h+'+'+l+'+'+t); */
+		return {
+			position: 'absolute',
+			top: t+'px',
+			left: l+'px',
+			width: w,
+			height: h,
+		};
+	},
+
+	showloading: function(){
+		this.loadingdiv.setStyle('display', 'block');
+	},
+
+	hideloading: function(){
+		this.loadingdiv.setStyle('display', 'none');
+	},
+
+	stopfx: function(){
+	},
+
+	updatecoords: function(){
+		this.coords = this.container.getCoordinates();
+		this.target = {
+			width: Math.round(this.coords.width *
+						this.options.percentage / 100),
+			height: Math.round(this.coords.height *
+						this.options.percentage / 100),
+		};
+		/* alert('coords: '+this.coords.width+'x'+this.coords.height+
+		     ', target: '+this.target.width+'x'+this.target.height); */
+	},
 
 });
 Show.implement(new Options);

@@ -51,9 +51,9 @@ function init_gallery() {
 			/* debugging output
 	var msg='loaded '+vimgs.length+' image descriptions:';
 	vimgs.each(function(vimg,i){
-		msg+='\nid='+i;
-		vimg.each(function(vimg,i){
-			msg+='\n     w='+vimg[0]+' h='+vimg[1]+' url='+vimg[2];
+		msg+='\nid='+i+' ('+vimg[0]+') title='+vimg[1];
+		vimg[2].each(function(vv,i){
+			msg+='\n     w='+vv[0]+' h='+vv[1]+' url='+vv[2];
 		});
 	});
 	alert(msg);
