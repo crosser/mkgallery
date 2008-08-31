@@ -16,8 +16,9 @@
 /* Initialize everything, to be called on domready */
 function init_gallery() {
 
-	/* List of lists of img variations. Each image variation is a three-element
-	 * array: [width, height, url]. Index of the outer array is the global ID.
+	/* List of lists of img variations. Each image variation is
+	 * a three-element array: [width, height, url]. Index of the
+	 * outer array is the global ID.
 	 *
 	 * [
 	 *  [ id, title, [
@@ -38,12 +39,12 @@ function init_gallery() {
 
 	$$('div.varimages').each(function(el,i){
 		rimgs[el.id] = i;
-		vimgs[i] = [];
+		vimgs[i] = [el.id, el.title, []];
 		el.getElements('a').each(function(ael,j){
 			dim = /(\d+)[^\d](\d+)/.exec(ael.text);
 			w = dim[1];
 			h = dim[2];
-			vimgs[i][j]=[w,h,ael.href,el.id,el.title];
+			vimgs[i][2][j]=[w,h,ael.href];
 		});
 	});
 

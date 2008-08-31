@@ -52,16 +52,15 @@ var Show = new Class({
 		this.controls.registershow(this);
 
 		window.addEvent('resize', this.resizer.bind(this))
-		window.addEvent('scroll', this.scroller.bind(this))
 	},
+
+	/* event handler for window resize */
 
 	resizer: function(){
 		alert('show.resizer called');
 	},
 
-	scroller: function(){
-		alert('show.scroller called');
-	},
+	/* prev, play, stop, next, exit, comm are methods for button presses */
 
 	prev: function(){
 		this.controls.info(-1,this.vimgs.length,
@@ -85,19 +84,24 @@ var Show = new Class({
 				'<ref>','next called');
 	},
 
-	start: function(id, play){
-		this.options.cbStart();
-		/* real job here */
-		return false; /* tao make it usable from href links */
-	},
-
 	exit: function(){
 		this.options.cbExit();
 	},
 
 	comm: function(){
-		alert('show.comm called, do nothing');
+		/* alert('show.comm called, do nothing'); */
 	},
+
+	/* Entry point: called to start doing things */
+
+	start: function(id, play){
+		this.options.cbStart();
+		alert('starting at '+id+', play='+play);
+		/* real job here */
+		return false; /* to make it usable from href links */
+	},
+
+	/* "Private" methods to do the real job */
 
 });
 Show.implement(new Options);

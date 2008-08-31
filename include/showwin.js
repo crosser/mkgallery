@@ -68,15 +68,29 @@ var showWindow = new Class({
 
 	show: function(){
 		if (this.options.tohide) {
-			this.options.tohide.setStyle('display', 'none');
+			this.hiddenstyles = this.options.tohide.getStyles(
+				'display'
+			);
+			this.options.tohide.setStyles({
+				display: 'none',
+			});
 		}
+		this.bodystyles = document.body.getStyles(
+			'overflow', 'overflow-x', 'overflow-y'
+		);
+		document.body.setStyles({
+			overflow: 'hidden',
+			'overflow-x': 'hidden',
+			'overflow-y': 'hidden',
+		});
 		this.container.setStyle('display', 'block');
 	},
 
 	hide: function(){
 		if (this.options.tohide) {
-			this.options.tohide.setStyle('display', 'block');
+			this.options.tohide.setStyles(this.hiddenstyles);
 		}
+		document.body.setStyles(this.bodystyles);
 		this.container.setStyle('display', 'none');
 	}
 })
