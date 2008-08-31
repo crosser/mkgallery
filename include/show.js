@@ -62,8 +62,10 @@ var Show = new Class({
 		};
 		this.updatecoords();
 		this.prevdisplay = new Element('img').
+			setStyle('opacity', 0).
 			injectInside(this.container.container);
 		this.ondisplay = new Element('img').
+			setStyle('opacity', 0).
 			injectInside(this.container.container);
 		this.loadingdiv = new Element('div').
 		addClass('loading').setStyles({
