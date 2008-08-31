@@ -43,6 +43,7 @@ var Show = new Class({
 			cbExit: function(){ alert('show exit undefined'); },
 			percentage: 98,
 			delay: 5000,
+			fxduration: 200,
 		}
 	},
 
@@ -60,7 +61,8 @@ var Show = new Class({
 			next: {},
 		};
 		this.updatecoords();
-		this.previd = -1;
+		this.prevdisplay = new Element('img').
+			injectInside(this.container.container);
 		this.ondisplay = new Element('img').
 			injectInside(this.container.container);
 		this.loadingdiv = new Element('div').
@@ -68,7 +70,7 @@ var Show = new Class({
 			position: 'absolute',
 			top: 0,
 			left: 0,
-			zIndex: 3,
+			zIndex: 4,
 			display: 'none',
 			width: this.coords.width,
 			height: this.coords.height,
@@ -119,6 +121,8 @@ var Show = new Class({
 
 	exit: function(){
 		if (this.isplaying) { $clear(this.timer); }
+		this.prevdisplay.setStyle('display', 'none');
+		this.ondisplay.setStyle('display', 'none');
 		this.stopfx();
 		this.options.cbExit();
 	},
@@ -141,7 +145,6 @@ var Show = new Class({
 
 	show: function(id){
 		/* alert('called show.show('+id+')'); */
-		this.previd = this.currentid;
 		this.currentid = id;
 		var newcache = {
 			prev: (id > 0)?this.prepare(id-1):{},
@@ -218,8 +221,28 @@ var Show = new Class({
 		var newstyle = this.calcsize(cachel);
 		var newimg = cachel.img.clone();
 		newimg.setStyles(newstyle);
+		newimg.setStyles({
+			zIndex: 3,
+			opacity: 0,
+		});
+		this.prevdisplay.dispose();
+		this.prevdisplay = this.ondisplay.clone().
+		setStyle('zIndex', 2).injectInside(this.container.container);
 		newimg.replaces(this.ondisplay);
 		this.ondisplay = newimg;
+		this.effect();
+	},
+
+	effect: function(){
+		this.fx = new Fx.Tween(this.ondisplay, {
+			duration: this.options.fxduration,
+		});
+		this.fx.addEvent('complete',this.displaycomplete.bind(this));
+		this.fx.start('opacity', 0, 1);
+	},
+
+	displaycomplete: function(){
+		this.prevdisplay.setStyle('display', 'none');
 		if (this.isplaying) {
 			this.timer = this.autonext.delay(this.delay,this);
 		}
@@ -269,6 +292,7 @@ var Show = new Class({
 	},
 
 	stopfx: function(){
+		if (this.fx) this.fx.cancel();
 	},
 
 	updatecoords: function(){

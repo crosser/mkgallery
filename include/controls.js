@@ -26,7 +26,7 @@ var Controls = new Class({
 	getOptions: function(){
 		return {
 			onClick: $empty,
-			zIndex: 3,
+			zIndex: 9,
 			buttonClass: 'controlButton',
 		}
 	},
