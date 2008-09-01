@@ -20,7 +20,6 @@ var showWindow = new Class({
 			container: document.body,
 			tohide: '',
 			onClick: $empty,
-			onKeypress: $empty,
 		}
 	},
 
@@ -44,8 +43,6 @@ var showWindow = new Class({
 			display: 'none'
 		}).addEvent('click', function(){
 			this.options.onClick()
-		}.bind(this)).addEvent('keypress', function(){
-			this.options.onKeypress()
 		}.bind(this)).injectInside(this.options.container);
 
 		window.addEvent('resize', this.position.bind(this));
