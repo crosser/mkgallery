@@ -72,9 +72,11 @@ var Show = new Class({
 
 		this.updatecoords();
 		this.prevdisplay = new Element('img').
+			setProperty('alt', 'Current Image').
 			setStyle('opacity', 0).
 			injectInside(this.container.container);
 		this.ondisplay = new Element('img').
+			setProperty('alt', 'Current Image').
 			setStyle('opacity', 0).
 			injectInside(this.container.container);
 		this.loadingdiv = new Element('div').
