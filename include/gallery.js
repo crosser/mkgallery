@@ -91,6 +91,20 @@ function init_gallery() {
 	};
 	var show = new Show(vimgs,showwin,ctl,showparms);
 
+	document.addEvent('keypress', function(ev){
+		if (ev.key == 'esc') {
+			show.exit();
+		} else if (ev.key == 'left') {
+			show.prev();
+		} else if (ev.key == 'right') {
+			show.next();
+		} else if (ev.key == 'space') {
+			show.toggleplay();
+		} else {
+			/* alert('keypress: '+ev.key); */
+		}
+	});
+
 	/* Update HTML */
 
 	$$('.conceal').each(function(el){

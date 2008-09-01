@@ -96,7 +96,7 @@ var Show = new Class({
 		if (this.currentid > 0) {
 			this.show(this.currentid-1);
 		} else {
-			alert('show.prev called beyond first element');
+			/* alert('show.prev called beyond first element'); */
 		}
 	},
 
@@ -113,11 +113,16 @@ var Show = new Class({
 		this.controls.running(1);
 	},
 
+	toggleplay: function(){
+		if (this.isplaying) { this.stop(); }
+		else { this.play(); }
+	},
+
 	next: function(){
 		if (this.currentid < this.vimgs.length-1) {
 			this.show(this.currentid+1);
 		} else {
-			alert('show.next called beyond last element');
+			/* alert('show.next called beyond last element'); */
 		}
 	},
 
