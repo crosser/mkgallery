@@ -139,6 +139,7 @@ var Show = new Class({
 		this.options.cbStart();
 		this.isplaying = play;
 		this.controls.running(this.isplaying);
+		this.updatecoords();
 		this.show(id);
 		return false; /* to make it usable from href links */
 	},

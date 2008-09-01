@@ -9,7 +9,7 @@
 */
 
 /*
-	Hidable "fullscreen" Window for Slideshow
+	Hideable "fullscreen" Window for Slideshow
 */
 
 var showWindow = new Class({
@@ -20,6 +20,7 @@ var showWindow = new Class({
 			container: document.body,
 			tohide: '',
 			onClick: $empty,
+			onKeypress: $empty,
 		}
 	},
 
@@ -43,9 +44,9 @@ var showWindow = new Class({
 			display: 'none'
 		}).addEvent('click', function(){
 			this.options.onClick()
+		}.bind(this)).addEvent('keypress', function(){
+			this.options.onKeypress()
 		}.bind(this)).injectInside(this.options.container);
-
-		this.position();
 
 		window.addEvent('resize', this.position.bind(this));
 		window.addEvent('scroll', this.position.bind(this));
@@ -93,6 +94,7 @@ var showWindow = new Class({
 			'overflow-x': 'hidden',
 			'overflow-y': 'hidden',
 		});
+		this.position();
 		this.container.setStyle('display', 'block');
 	},
 

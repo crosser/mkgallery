@@ -120,4 +120,11 @@ function init_gallery() {
 }
 
 /* Initialization */
-window.addEvent('domready',init_gallery)
+window.addEvent('domready',init_gallery);
+
+/* This is how I would like it done for explorer:
+window.addEvent('readystatechange',function(parm){
+	alert('readystatechange, parm='+parm);
+	init_gallery();
+});
+/* but it does not seem to work */

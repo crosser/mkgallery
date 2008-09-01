@@ -595,7 +595,9 @@ sub endindex {
 	my $self = shift;
 	my $IND = $self->{-IND};
 
-	print $IND end_center,end_div,end_html,"\n";
+	print $IND end_center,end_div,
+	# "\n",'<script type="text/javascript">init_gallery();</script>',"\n",
+	end_html,"\n";
 
 	close($IND) if ($IND);
 	undef $self->{-IND};
