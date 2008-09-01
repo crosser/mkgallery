@@ -5,7 +5,7 @@
 	http://www.average.org/mkgallery/
 */
 
-.slideimage img {
+img.thumbnail {
  clear:both;
  border-style: inset;
  border-color: gray;
@@ -13,7 +13,7 @@
  margin: 0.2ex;
 }
 
-.slideshowContainer img {
+img.mainformat {
  clear:both;
  border-style: none;
  margin: 0px;

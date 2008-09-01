@@ -510,6 +510,7 @@ sub makeaux {
 				end_table,"\n",
 				center(table({-class=>'picframe'},
 					Tr(td(img({-src=>$imgsrc,
+						   -class=>'standalone',
 						   -alt=>$title}))))),"\n",
 				end_html,"\n";
 			close($F);
@@ -538,6 +539,7 @@ sub makeaux {
 			h1($title),"\n",
 			table({-class=>'ipage'},
 				Tr(td(img({-src=>$imgsrc,
+					   -class=>'thumbnail',
 					   -alt=>$title})),
 					td($self->infotable))),
 			a({-href=>'../index.html',-class=>'conceal'},
@@ -649,7 +651,7 @@ sub startimglist {
 	my $slideref = sprintf(".html/%s-slide.html",$first);
 
 	print $IND h2("Images ",
-		a({-href=>$slideref,-class=>'showStart',-id=>$first},
+		a({-href=>$slideref,-class=>'showStart',-rel=>'i'.$first},
 			'&gt; slideshow')),"\n";
 }
 
@@ -668,18 +670,20 @@ sub img_entry {
 
 	print $IND a({-name=>$name}),"\n",
 		start_table({-class=>'slide'}),start_Tr,start_td,"\n",
-		div({-class=>'slidetitle',-id=>$name},
+		div({-class=>'slidetitle'},
 			"\n ",a({-href=>".html/$name-info.html",
 				-title=>'Image Info: '.$name,
 				-class=>'infoBox'},
 				$title),"\n"),"\n",
-		div({-class=>'slideimage',-id=>$name},
+		div({-class=>'slideimage'},
 			"\n ",a({-href=>".html/$name-static.html",
 				-title=>$title,
 				-class=>'showImage',
-				-id=>$name},
-				img({-src=>$thumb,-alt=>$title})),"\n"),"\n",
-		start_div({-class=>'varimages',-id=>$name,-title=>$title}),"\n";
+				-rel=>'i'.$name},
+				img({-src=>$thumb,
+				     -class=>'thumbnail',
+				     -alt=>$title})),"\n"),"\n",
+		start_div({-class=>'varimages',-id=>'i'.$name,-title=>$title}),"\n";
 	foreach my $sz(@sizes) {
 		my $src=$self->{$sz}->{'url'};
 		my $w=$self->{$sz}->{'dim'}->[0];

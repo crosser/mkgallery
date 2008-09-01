@@ -38,8 +38,9 @@ function init_gallery() {
 	/* Populate images list */
 
 	$$('div.varimages').each(function(el,i){
-		rimgs[el.id] = i;
-		vimgs[i] = [el.id, el.title, []];
+		var rel=el.get('id');
+		rimgs[rel] = i;
+		vimgs[i] = [rel, el.title, []];
 		el.getElements('a').each(function(ael,j){
 			dim = /(\d+)[^\d](\d+)/.exec(ael.text);
 			w = dim[1];
@@ -117,11 +118,11 @@ function init_gallery() {
 
 	$$('a.showStart').each(function(el){
 		el.addEvent('click',
-				show.start.bind(show,[rimgs[el.get('id')],1]));
+			show.start.bind(show,[rimgs[el.get('rel')],1]));
 	});
 	$$('a.showImage').each(function(el){
 		el.addEvent('click',
-				show.start.bind(show,[rimgs[el.get('id')],0]));
+			show.start.bind(show,[rimgs[el.get('rel')],0]));
 	});
 
 	/* Determine if we need to go directly into show mode */
