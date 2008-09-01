@@ -509,7 +509,8 @@ sub makeaux {
 				end_Tr,
 				end_table,"\n",
 				center(table({-class=>'picframe'},
-					Tr(td(img({-src=>$imgsrc}))))),"\n",
+					Tr(td(img({-src=>$imgsrc,
+						   -alt=>$title}))))),"\n",
 				end_html,"\n";
 			close($F);
 		}
@@ -536,7 +537,8 @@ sub makeaux {
 			start_center,"\n",
 			h1($title),"\n",
 			table({-class=>'ipage'},
-				Tr(td(img({-src=>$imgsrc})),
+				Tr(td(img({-src=>$imgsrc,
+					   -alt=>$title})),
 					td($self->infotable))),
 			a({-href=>'../index.html',-class=>'conceal'},
 				'Index'),"\n",
@@ -676,7 +678,7 @@ sub img_entry {
 				-title=>$title,
 				-class=>'showImage',
 				-id=>$name},
-				img({-src=>$thumb})),"\n"),"\n",
+				img({-src=>$thumb,-alt=>$title})),"\n"),"\n",
 		start_div({-class=>'varimages',-id=>$name,-title=>$title}),"\n";
 	foreach my $sz(@sizes) {
 		my $src=$self->{$sz}->{'url'};
