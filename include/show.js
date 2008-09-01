@@ -168,7 +168,7 @@ var Show = new Class({
 			this.showloading();
 		}
 		this.controls.info(id,this.vimgs.length,
-				this.vimgs[id][0],
+				'#'+this.vimgs[id][0],
 				this.vimgs[id][1]);
 	},
 
