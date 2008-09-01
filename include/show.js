@@ -60,6 +60,16 @@ var Show = new Class({
 			curr: {},
 			next: {},
 		};
+/*
+ *  thescripts.com/forum/thread170365.html
+ */
+		var hashpos = document.URL.search(/#/);
+		if (hashpos > 0) {
+			this.baseurl = document.URL.slice(0,hashpos);
+		} else {
+			this.baseurl = document.URL
+		}
+
 		this.updatecoords();
 		this.prevdisplay = new Element('img').
 			setStyle('opacity', 0).
@@ -132,6 +142,7 @@ var Show = new Class({
 		this.ondisplay.setStyle('display', 'none');
 		this.stopfx();
 		this.options.cbExit();
+		document.location.href = this.baseurl;
 	},
 
 	comm: function(){
@@ -167,6 +178,7 @@ var Show = new Class({
 			this.pendingload = true;
 			this.showloading();
 		}
+		document.location.href = this.baseurl+'#'+this.vimgs[id][0];
 		this.controls.info(id,this.vimgs.length,
 				'#'+this.vimgs[id][0],
 				this.vimgs[id][1]);
