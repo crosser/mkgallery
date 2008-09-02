@@ -104,6 +104,8 @@ var Show = new Class({
 	/* prev, play, stop, next, exit, comm are methods for button presses */
 
 	prev: function(){
+		this.cleartimer();
+		this.stopfx();
 		if (this.currentid > 0) {
 			this.show(this.currentid-1);
 		} else {
@@ -112,9 +114,8 @@ var Show = new Class({
 	},
 
 	stop: function(){
-		if (this.isplaying) { $clear(this.timer); }
+		this.cleartimer()
 		this.isplaying = false;
-		$clear(this.timer);
 		this.controls.running(0);
 	},
 
@@ -130,6 +131,8 @@ var Show = new Class({
 	},
 
 	next: function(){
+		this.cleartimer();
+		this.stopfx();
 		if (this.currentid < this.vimgs.length-1) {
 			this.show(this.currentid+1);
 		} else {
@@ -138,12 +141,12 @@ var Show = new Class({
 	},
 
 	exit: function(){
-		if (this.isplaying) { $clear(this.timer); }
+		this.cleartimer();
+		this.stopfx();
 		this.prevdisplay.setStyle('display', 'none');
 		this.ondisplay.setStyle('display', 'none');
-		this.stopfx();
-		this.options.cbExit();
 		document.location.href = this.baseurl;
+		this.options.cbExit();
 	},
 
 	comm: function(){
@@ -310,6 +313,10 @@ var Show = new Class({
 
 	hideloading: function(){
 		this.loadingdiv.setStyle('display', 'none');
+	},
+
+	cleartimer: function(){
+		if (this.isplaying) { $clear(this.timer); }
 	},
 
 	stopfx: function(){
