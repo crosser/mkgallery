@@ -72,10 +72,10 @@ var Show = new Class({
 
 		this.updatecoords();
 		this.prevdisplay = new Element('img').
-			setStyle('opacity', 0).
-			injectInside(this.container.domelement());
-		this.ondisplay = this.prevdisplay.clone().
-			injectInside(this.container.domelement());
+			setStyle('opacity', 0);
+		this.container.grab(this.prevdisplay);
+		this.ondisplay = this.prevdisplay.clone();
+		this.container.grab(this.ondisplay);
 		this.loadingdiv = new Element('div').
 		addClass('loading').setStyles({
 			position: 'absolute',
@@ -85,7 +85,8 @@ var Show = new Class({
 			display: 'none',
 			width: this.coords.width,
 			height: this.coords.height,
-		}).injectInside(this.container.domelement());
+		});
+		this.container.grab(this.loadingdiv);
 
 		window.addEvent('resize', this.resizer.bind(this))
 	},
@@ -252,8 +253,8 @@ var Show = new Class({
 		setProperty('alt', 'Previous Image').
 		setStyle('zIndex', 2);
 		this.prevdisplay = this.ondisplay;
-		this.ondisplay = newimg.
-		injectInside(this.container.domelement());
+		this.ondisplay = newimg;
+		this.container.grab(this.ondisplay);
 		this.effect();
 	},
 

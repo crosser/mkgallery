@@ -103,8 +103,8 @@ var showWindow = new Class({
 		this.container.setStyle('display', 'none');
 	},
 
-	domelement: function(){
-		return this.container;
+	grab: function(obj){
+		return this.container.grab(obj);
 	},
 })
 showWindow.implement(new Options);
