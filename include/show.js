@@ -72,8 +72,6 @@ var Show = new Class({
 
 		this.updatecoords();
 		this.prevdisplay = new Element('img').
-			set('class', 'mainformat').
-			setProperty('alt', 'Current Image').
 			setStyle('opacity', 0).
 			injectInside(this.container.domelement());
 		this.ondisplay = this.prevdisplay.clone().
@@ -242,18 +240,20 @@ var Show = new Class({
 	},
 
 	display: function(cachel){
-		var newstyle = this.calcsize(cachel);
-		var newimg = cachel.img.clone();
-		newimg.setStyles(newstyle);
-		newimg.setStyles({
+		var newimg = cachel.img.clone().
+		set('class', 'mainformat').
+		setProperty('alt', 'Current Image').
+		setStyles(this.calcsize(cachel)).
+		setStyles({
 			zIndex: 3,
 			opacity: 0,
 		});
-		this.prevdisplay.dispose();
-		this.prevdisplay = this.ondisplay.clone().
-		setStyle('zIndex', 2).injectInside(this.container.domelement());
-		newimg.replaces(this.ondisplay);
-		this.ondisplay = newimg;
+		this.ondisplay.replaces(this.prevdisplay).
+		setProperty('alt', 'Previous Image').
+		setStyle('zIndex', 2);
+		this.prevdisplay = this.ondisplay;
+		this.ondisplay = newimg.
+		injectInside(this.container.domelement());
 		this.effect();
 	},
 

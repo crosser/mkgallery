@@ -74,5 +74,7 @@ TODO:
 - make index.html depend of .title and directory timestamps
 - rebuild htmls in .html when directory timestamp chnges (images added)
 - make links in the rss file relative
+- try to make showwin "Extending: Element" and get rid of domelement()
+  dummy getter and getCoordinates() replacement function
 
 Eugene Crosser <crosser at average dot org>
