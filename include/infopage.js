@@ -9,10 +9,10 @@ function process_infopage() {
 	parsedurl = parseUrl(document.URL)
 	if (parsedurl['query'] == 'conceal'){
 		$$('.conceal').each(function(el){
-			el.setStyle('display', 'none')
+			el.setStyle('display', 'none');
 		})
 	}
 }
 
 /* Initialization */
-window.addEvent('domready',process_infopage)
+window.addEvent('domready',process_infopage);

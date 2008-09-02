@@ -134,5 +134,6 @@ var Controls = new Class({
 		}
 	},
 });
+
 Controls.implement(new Options);
 
