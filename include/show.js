@@ -75,9 +75,9 @@ var Show = new Class({
 			set('class', 'mainformat').
 			setProperty('alt', 'Current Image').
 			setStyle('opacity', 0).
-			injectInside(this.container.container);
+			injectInside(this.container.domelement());
 		this.ondisplay = this.prevdisplay.clone().
-			injectInside(this.container.container);
+			injectInside(this.container.domelement());
 		this.loadingdiv = new Element('div').
 		addClass('loading').setStyles({
 			position: 'absolute',
@@ -87,7 +87,7 @@ var Show = new Class({
 			display: 'none',
 			width: this.coords.width,
 			height: this.coords.height,
-		}).injectInside(this.container.container);
+		}).injectInside(this.container.domelement());
 
 		window.addEvent('resize', this.resizer.bind(this))
 	},
@@ -251,7 +251,7 @@ var Show = new Class({
 		});
 		this.prevdisplay.dispose();
 		this.prevdisplay = this.ondisplay.clone().
-		setStyle('zIndex', 2).injectInside(this.container.container);
+		setStyle('zIndex', 2).injectInside(this.container.domelement());
 		newimg.replaces(this.ondisplay);
 		this.ondisplay = newimg;
 		this.effect();

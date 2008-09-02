@@ -101,7 +101,11 @@ var showWindow = new Class({
 		}
 		document.body.setStyles(this.bodystyles);
 		this.container.setStyle('display', 'none');
-	}
+	},
+
+	domelement: function(){
+		return this.container;
+	},
 })
 showWindow.implement(new Options);
 
