@@ -309,7 +309,11 @@ var Show = new Class({
 	},
 
 	showloading: function(){
-		this.loadingdiv.setStyle('display', 'block');
+		this.loadingdiv.setStyles({
+			display: 'block',
+			width: this.coords.width,
+			height: this.coords.height,
+		});
 	},
 
 	hideloading: function(){
