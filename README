@@ -71,6 +71,7 @@ Homepage:
 http://www.average.org/mkgallery/
 
 TODO:
+- implement header and footer insertion
 - make index.html depend of .title and directory timestamps
 - rebuild htmls in .html when directory timestamp chnges (images added)
 - make links in the rss file relative

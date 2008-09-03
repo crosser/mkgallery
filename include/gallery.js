@@ -42,7 +42,7 @@ function init_gallery() {
 		rimgs[rel] = i;
 		vimgs[i] = [rel, el.title, []];
 		el.getElements('a').each(function(ael,j){
-			dim = /(\d+)[^\d](\d+)/.exec(ael.text);
+			dim = /(\d+)[^\d](\d+)/.exec(ael.rel);
 			w = dim[1];
 			h = dim[2];
 			vimgs[i][2][j]=[w,h,ael.href];
@@ -72,12 +72,12 @@ function init_gallery() {
 		openFromLink: false,
 		movieWidth: 640,
 		movieHeight: 480,
-		descClassName: 'infoBoxDesc',
+		descClassName: 'infoBoxDesc'
 	};
 	ibox = new multiBox('infoBox', iboxparams);
 
 	var winparms = {
-		tohide: 'indexContainer',
+		tohide: 'indexContainer'
 	};
 	var showwin = new showWindow('slideshowContainer',winparms);
 
@@ -88,7 +88,7 @@ function init_gallery() {
 
 	var showparms = {
 		cbStart: function(){ showwin.show(); },
-		cbExit: function(){ showwin.hide(); },
+		cbExit: function(){ showwin.hide(); }
 	};
 	var show = new Show(vimgs,showwin,ctl,showparms);
 

@@ -27,7 +27,7 @@ var Controls = new Class({
 		return {
 			onClick: $empty,
 			zIndex: 9,
-			buttonClass: 'controlButton',
+			buttonClass: 'controlButton'
 		}
 	},
 
@@ -37,9 +37,9 @@ var Controls = new Class({
 		this.container = new Element('div').addClass(name).
 		setProperties({
 			id: name,
-			name: name,
+			name: name
 		}).setStyles({
-			zIndex: this.options.zIndex,
+			zIndex: this.options.zIndex
 		}).addEvent('click', function(){
 			this.options.onClick()
 		}.bind(this)).injectInside(this.parent);
@@ -49,7 +49,7 @@ var Controls = new Class({
 			sub.addClass(this.options.buttonClass).setProperties({
 				id: el,
 				name: el,
-				title: el,
+				title: el
 			}).addEvent('click', function(){
 				this[el]();
 			}.bind(this)).injectInside(this.container);
@@ -57,13 +57,13 @@ var Controls = new Class({
 		},this);
 		this.posbox = new Element('span').
 		addClass('controlPosition').setProperties({
-			id: 'controlPosition',
+			id: 'controlPosition'
 		}).injectInside(this.commbox);
 		this.refbox = new Element('a', {
 			href: 'javascript: void(1);',
-			html: 'title',
+			html: 'title'
 		}).addClass('controlRef').setProperties({
-			id: 'controlRef',
+			id: 'controlRef'
 		}).injectInside(this.commbox);
 	},
 
@@ -132,7 +132,7 @@ var Controls = new Class({
 			this.stopbox.setStyle('display', 'none');
 			this.playbox.setStyle('display', 'block');
 		}
-	},
+	}
 });
 
 Controls.implement(new Options);

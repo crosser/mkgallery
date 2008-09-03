@@ -43,7 +43,7 @@ var Show = new Class({
 			cbExit: function(){ alert('show exit undefined'); },
 			percentage: 98,
 			delay: 5000,
-			fxduration: 200,
+			fxduration: 200
 		}
 	},
 
@@ -58,7 +58,7 @@ var Show = new Class({
 		this.cache = {
 			prev: {},
 			curr: {},
-			next: {},
+			next: {}
 		};
 /*
  *  thescripts.com/forum/thread170365.html
@@ -84,7 +84,7 @@ var Show = new Class({
 			zIndex: 4,
 			display: 'none',
 			width: this.coords.width,
-			height: this.coords.height,
+			height: this.coords.height
 		});
 		this.container.grab(this.loadingdiv);
 
@@ -171,7 +171,7 @@ var Show = new Class({
 		var newcache = {
 			prev: (id > 0)?this.prepare(id-1):{},
 			curr: this.prepare(id),
-			next: (id < (this.vimgs.length-1))?this.prepare(id+1):{},
+			next: (id < (this.vimgs.length-1))?this.prepare(id+1):{}
 		};
 		delete this.cache;
 		this.cache = newcache;
@@ -211,7 +211,7 @@ var Show = new Class({
 				id: id,
 				vi: vi,
 				ready: false,
-				url: this.vimgs[id][2][vi][2],
+				url: this.vimgs[id][2][vi][2]
 			};
 			cachel.img = this.bgload(cachel);
 		}
@@ -224,7 +224,7 @@ var Show = new Class({
 		return new Asset.image(this.vimgs[cachel.id][2][cachel.vi][2],{
 			id: this.vimgs[cachel.id][0],
 			title: this.vimgs[cachel.id][1],
-			onload: this.loadcomplete.bind(this,[cachel]),
+			onload: this.loadcomplete.bind(this,[cachel])
 		});
 	},
 
@@ -247,7 +247,7 @@ var Show = new Class({
 		setStyles(this.calcsize(cachel)).
 		setStyles({
 			zIndex: 3,
-			opacity: 0,
+			opacity: 0
 		});
 		this.ondisplay.replaces(this.prevdisplay).
 		setProperty('alt', 'Previous Image').
@@ -260,7 +260,7 @@ var Show = new Class({
 
 	effect: function(){
 		this.fx = new Fx.Tween(this.ondisplay, {
-			duration: this.options.fxduration,
+			duration: this.options.fxduration
 		});
 		this.fx.addEvent('complete',this.displaycomplete.bind(this));
 		this.fx.start('opacity', 0, 1);
@@ -284,6 +284,15 @@ var Show = new Class({
 	},
 
 	calcsize: function(cachel){
+		if (! cachel.id) {
+			return {
+				position: 'absolute',
+				top: 0+'px',
+				left: 0+'px',
+				width: this.coords.width,
+				height: this.coords.height
+			};
+		}
 		var factor = 1;
 		var candidate;
 		candidate = this.target.width /
@@ -304,7 +313,7 @@ var Show = new Class({
 			top: t+'px',
 			left: l+'px',
 			width: w,
-			height: h,
+			height: h
 		};
 	},
 
@@ -312,7 +321,7 @@ var Show = new Class({
 		this.loadingdiv.setStyles({
 			display: 'block',
 			width: this.coords.width,
-			height: this.coords.height,
+			height: this.coords.height
 		});
 	},
 
@@ -334,13 +343,14 @@ var Show = new Class({
 			width: Math.round(this.coords.width *
 						this.options.percentage / 100),
 			height: Math.round(this.coords.height *
-						this.options.percentage / 100),
+						this.options.percentage / 100)
 		};
 		/* alert('coords: '+this.coords.width+'x'+this.coords.height+
 		     ', target: '+this.target.width+'x'+this.target.height); */
-	},
+	}
 
 });
+
 Show.implement(new Options);
 Show.implement(new Events);
 

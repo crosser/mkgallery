@@ -19,7 +19,7 @@ var showWindow = new Class({
 			zIndex: 2,
 			container: document.body,
 			tohide: '',
-			onClick: $empty,
+			onClick: $empty
 		}
 	},
 
@@ -32,7 +32,7 @@ var showWindow = new Class({
 		this.container = new Element('div').addClass(name).
 		setProperties({
 			id: name,
-			name: name,
+			name: name
 		}).setStyles({
 			position: 'absolute',
 			left: '0px',
@@ -70,7 +70,7 @@ var showWindow = new Class({
 		return {
 			width: this.w,
 			height: this.h,
-			top: this.s,
+			top: this.s
 		};
 	},
 
@@ -80,7 +80,7 @@ var showWindow = new Class({
 				'display'
 			);
 			this.options.tohide.setStyles({
-				display: 'none',
+				display: 'none'
 			});
 		}
 		this.bodystyles = document.body.getStyles(
@@ -89,7 +89,7 @@ var showWindow = new Class({
 		document.body.setStyles({
 			overflow: 'hidden',
 			'overflow-x': 'hidden',
-			'overflow-y': 'hidden',
+			'overflow-y': 'hidden'
 		});
 		this.position();
 		this.container.setStyle('display', 'block');
@@ -105,7 +105,8 @@ var showWindow = new Class({
 
 	grab: function(obj){
 		return this.container.grab(obj);
-	},
-})
+	}
+});
+
 showWindow.implement(new Options);
 

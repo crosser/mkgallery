@@ -690,10 +690,12 @@ sub img_entry {
 		my $h=$self->{$sz}->{'dim'}->[1];
 		print $IND "  ",a({-href=>$src,
 			-class=>"conceal",
+			-rel=>$w."x".$h,
 			-title=>"Reduced to ".$w."x".$h},
 			$w."x".$h)," \n";
 	}
 	print $IND "  ",a({-href=>$name,
+				-rel=>$w."x".$h,
 				-title=>'Original'},$w."x".$h),
 		"\n",end_div,"\n",
 		end_td,end_Tr,end_table,"\n";
