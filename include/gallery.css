@@ -5,6 +5,14 @@
 	http://www.average.org/mkgallery/
 */
 
+h2.ititle {
+	text-align: center;
+}
+
+h2.atitle {
+	text-align: center;
+}
+
 img.thumbnail {
  clear:both;
  border-style: inset;

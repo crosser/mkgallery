@@ -1,0 +1,18 @@
+h1.title {
+	text-align: center;
+}
+
+hr.footer {
+	width: 80%;
+}
+
+div.linkup {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+}
+
+div.genby {
+	font-size: small;
+	text-align: right;
+}

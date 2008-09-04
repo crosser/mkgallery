@@ -105,6 +105,7 @@ sub new {
 		$self = {
 				-parent=>$parent,
 				-root=>$parent->{-root},
+				-depth=>$parent->{-depth}+1,
 				-base=>$name,
 				-fullpath=>$fullpath,
 				-inc=>'../'.$parent->{-inc},
@@ -114,6 +115,7 @@ sub new {
 		$class = $this;
 		my $root=shift;
 		$self = {
+				-depth=>0,
 				-root=>$root,
 				-fullpath=>$root,
 				-inc=>getinc($root),
@@ -575,7 +577,10 @@ sub startindex {
 	print $IND start_html(-title => $title,
 			-encoding=>"utf-8",
 			-head=>$rsslink,
-			-style=>{-src=>$inc."gallery.css"},
+			-style=>[
+				{-src=>$inc."gallery.css"},
+				{-src=>$inc."custom.css"},
+			],
 			-script=>[
 				{-src=>$inc."mootools.js"},
 				{-src=>$inc."overlay.js"},
@@ -589,19 +594,48 @@ sub startindex {
 		comment("Created by ".$version),"\n",
 		start_div({-class => 'indexContainer',
 				-id => 'indexContainer'}),
-		a({-href=>"../index.html"},"UP"),"\n",
-		start_center,"\n",
-		h1($title),"\n",
 		"\n";
+	my $EVL;
+	if (open($EVL,$inc.'header.pl')) {
+		my $prm;
+		while (<$EVL>) {
+			$prm .= $_;
+		}
+		close($EVL);
+		%_ = (
+			-version	=> $version,
+			-depth		=> $self->{-depth},
+			-title		=> $title,
+			-breadcrumbs	=> "breadcrumbs unimplemented",
+		);
+		print $IND eval $prm,"\n";
+	} else {
+		print $IND a({-href=>"../index.html"},"UP"),"\n",
+			h1({-class=>'title'},$title),"\n",
+	}
 }
 
 sub endindex {
 	my $self = shift;
 	my $IND = $self->{-IND};
 
-	print $IND end_center,end_div,
-	# "\n",'<script type="text/javascript">init_gallery();</script>',"\n",
-	end_html,"\n";
+	print $IND end_div;
+	my $EVL;
+	if (open($EVL,$self->{-inc}.'footer.pl')) {
+		my $prm;
+		while (<$EVL>) {
+			$prm .= $_;
+		}
+		close($EVL);
+		%_ = (
+			-version	=> $version,
+			-depth		=> $self->{-depth},
+			-title		=> $self->{-title},
+			-breadcrumbs	=> "breadcrumbs unimplemented",
+		);
+		print $IND eval $prm,"\n";
+	}
+	print $IND end_html,"\n";
 
 	close($IND) if ($IND);
 	undef $self->{-IND};
@@ -623,7 +657,7 @@ sub startsublist {
 	my $self = shift;
 	my $IND = $self->{-IND};
 
-	print $IND h2("Albums"),"\n",start_table,"\n";
+	print $IND h2({-class=>"atitle"},"Albums"),"\n",start_table,"\n";
 }
 
 sub sub_entry {
@@ -650,7 +684,7 @@ sub startimglist {
 	my $first = $self->{-firstimg}->{-base};
 	my $slideref = sprintf(".html/%s-slide.html",$first);
 
-	print $IND h2("Images ",
+	print $IND h2({-class=>"ititle"},"Images ",
 		a({-href=>$slideref,-class=>'showStart',-rel=>'i'.$first},
 			'&gt; slideshow')),"\n";
 }
