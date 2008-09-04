@@ -101,15 +101,15 @@ sub new {
 		$class = ref($this);
 		my $parent = $this;
 		my $name = shift;
-		my $fullpath = $parent->{-fullpath}.'/'.$name;
 		$self = {
 				-parent=>$parent,
 				-root=>$parent->{-root},
+				-toppath=>$parent->{-toppath},
 				-depth=>$parent->{-depth}+1,
 				-base=>$name,
-				-fullpath=>$fullpath,
+				-fullpath=>$parent->{-fullpath}.'/'.$name,
+				-relpath=>$parent->{-relpath}.'/'.$name,
 				-inc=>'../'.$parent->{-inc},
-				-rss=>'../'.$parent->{-rss},
 			};
 	} else {
 		$class = $this;
@@ -118,9 +118,9 @@ sub new {
 				-depth=>0,
 				-root=>$root,
 				-fullpath=>$root,
-				-inc=>getinc($root),
-				-rss=>getrss($root),
 			};
+		# fill in -inc, -rss, -relpath
+		initpaths($self); # we are not blessed yet, so cheat.
 	}
 	bless $self, $class;
 	if ($debug) {
@@ -132,30 +132,51 @@ sub new {
 	return $self;
 }
 
-sub getinc {
-	my $fullpath=shift;	# this is not a method
+sub initpaths {
+	my $self=shift;		# this is not a method but we cheat
 	my $depth=20;		# arbitrary max depth
+	my $fullpath=$self->{-fullpath};
+	my $inc;
+	my $rss;
+	my $relpath;
 
 	if ($incpath) {
-		return $incpath."/.gallery2";
-	}
-
-	my $inc=".gallery2";
-	while ( ! -d $fullpath."/".$inc ) {
-		$inc = "../".$inc;
-		last unless ($depth-- > 0);
+		$inc = $incpath."/.gallery2";
+	} else {
+		$inc=".gallery2";
+		while ( ! -d $fullpath."/".$inc ) {
+			$inc = "../".$inc;
+			last unless ($depth-- > 0);
+		}
 	}
 	if ($depth > 0) {
-		return $inc.'/';		# prefix with trailing slash
+		$self->{-inc} = $inc.'/';
+		my $dp=0;
+		my $pos;
+		for ($pos=index($inc,'/');$pos>=0;
+					$pos=index($inc,'/',$pos+1)) {
+			$dp++;
+		}
+		for ($pos=length($fullpath);$dp-->0 && $pos>0;
+					$pos=rindex($fullpath,'/',$pos-1)) {;}
+		my $relpath = substr($fullpath,$pos);
+		$relpath =~ s%^/%%;
+		$self->{-relpath} = $relpath;
+		$self->{-toppath} = substr($fullpath,0,$pos);
+		initrss($self);
 	} else {
-		return 'NO-.INCLUDE-IN-PATH/';	# won't work anyway
+		$self->{-inc} = 'NO-.INCLUDE-IN-PATH/';	# won't work anyway
+		$self->{-rss} = '';
+		$self->{-relpath} = '';
 	}
 }
 
-sub getrss {
-	my $fullpath=shift;	# this is not a method
-	my $depth=20;		# arbitrary max depth
+sub initrss {
+	my $self=shift;		# this is not a method but we cheat
+	my $fullpath=$self->{-fullpath};
+	my $depth=20;
 
+	return;
 	return "" unless $rssfile;
 
 	my $rss=$rssfile;
@@ -366,7 +387,7 @@ sub edittitle {
 		close($T);
 	}
 	if ($asktitle || (!$title && !$noasktitle)) {
-		my $prompt = $self->{-base};
+		my $prompt = $self->{-relpath};
 		$prompt = '/' unless ($prompt);
 		my $OUT = $term->OUT || \*STDOUT;
 		print $OUT "Enter title for $fullpath\n";
@@ -378,7 +399,7 @@ sub edittitle {
 		}
 	}
 	unless ($title) {
-		$title=substr($fullpath,length($self->{-root}));
+		$title=$self->{-relpath};
 	}
 	$self->{-title}=$title;
 	print "title in $fullpath is $title\n" if ($debug);
