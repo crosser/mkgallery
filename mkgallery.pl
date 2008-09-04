@@ -44,6 +44,7 @@ my $haverssxml = eval { require XML::RSS; };
 { package XML::RSS; }		# to make perl compiler happy
 
 my @sizes = (160, 640, 1600);
+my $incdir = ".gallery2";
 
 ######################################################################
 
@@ -137,32 +138,35 @@ sub initpaths {
 	my $depth=20;		# arbitrary max depth
 	my $fullpath=$self->{-fullpath};
 	my $inc;
-	my $rss;
 	my $relpath;
 
 	if ($incpath) {
-		$inc = $incpath."/.gallery2";
+		$inc = $incpath;
+		$inc .= '/' unless ($inc =~ m%/$%);
 	} else {
-		$inc=".gallery2";
-		while ( ! -d $fullpath."/".$inc ) {
+		$inc="";
+		while ( ! -d $fullpath."/".$inc."/".$incdir ) {
 			$inc = "../".$inc;
 			last unless ($depth-- > 0);
 		}
 	}
 	if ($depth > 0) {
-		$self->{-inc} = $inc.'/';
+		$self->{-inc} = $inc;
 		my $dp=0;
 		my $pos;
 		for ($pos=index($inc,'/');$pos>=0;
 					$pos=index($inc,'/',$pos+1)) {
 			$dp++;
 		}
-		for ($pos=length($fullpath);$dp-->0 && $pos>0;
-					$pos=rindex($fullpath,'/',$pos-1)) {;}
+		for ($pos=length($fullpath);$dp>0 && $pos>0;
+					$pos=rindex($fullpath,'/',$pos-1)) {
+			$dp--;
+		}
 		my $relpath = substr($fullpath,$pos);
 		$relpath =~ s%^/%%;
 		$self->{-relpath} = $relpath;
 		$self->{-toppath} = substr($fullpath,0,$pos);
+		#print "rel=$relpath, top=$self->{-toppath}, inc=$inc\n";
 		initrss($self);
 	} else {
 		$self->{-inc} = 'NO-.INCLUDE-IN-PATH/';	# won't work anyway
@@ -174,31 +178,67 @@ sub initpaths {
 sub initrss {
 	my $self=shift;		# this is not a method but we cheat
 	my $fullpath=$self->{-fullpath};
-	my $depth=20;
+	my $inc=$self->{-inc}.$incdir.'/';
+	my $conffile=$inc.'rss.conf';
+	my $CONF;
 
-	return;
-	return "" unless $rssfile;
-
-	my $rss=$rssfile;
-	while ( ! -f $fullpath."/".$rss ) {
-		$rss = "../".$rss;
-		last unless ($depth-- > 0);
+	if ($rssfile) {
+		if (open($CONF,">".$conffile)) {
+			print $CONF "file: ",$rssfile,"\n";
+			close($CONF);
+		} else {
+			print STDERR "could not open $conffile: $!\n";
+		}
+	} else {
+		if (open($CONF,$conffile)) {
+			my $ln=<$CONF>;
+			close($CONF);
+			chop $ln;
+			my ($k,$v)=split(':', $ln);
+			$k =~ s/^\s*//;
+			$k =~ s/\s*$//;
+			$v =~ s/^\s*//;
+			$v =~ s/\s*$//;
+			if ($k eq 'file') {
+				$rssfile=$v;
+			}
+		}
 	}
-	if ($depth > 0) {
-		$rssobj->{'file'} = $rss;
-		$rssobj->{'rss'} = new XML::RSS (version=>2);
-		$rssobj->{'rss'}->parsefile($rss);
+
+	return unless ($rssfile);
+
+	$rssobj->{'file'} = $self->{-toppath}.'/'.$rssfile;
+	$rssobj->{'rss'} = new XML::RSS (version=>'2.0');
+	if ( -f $rssobj->{'file'} ) {
+		$rssobj->{'rss'}->parsefile($rssobj->{'file'});
 		my $itemstodel = @{$rssobj->{'rss'}->{'items'}} - 15;
 		while ($itemstodel-- > 0) {
 			pop(@{$rssobj->{'rss'}->{'items'}})
 		}
 		$rssobj->{'rss'}->save($rssobj->{'file'});
-		return $rss;
 	} else {
-		print STDERR "There is no $rssfile in this or parent ".
-			"directories, you must create one with mkgalrss.pl\n";
-		exit 1;
+		my $link="";
+		for (my $pos=index($rssfile,'/');$pos>=0;
+					$pos=index($rssfile,'/',$pos+1)) {
+			$link = '../'.$link;
+		}
+		
+		$rssobj->{'rss'}->channel(
+			title=>'Gallery',
+			link=>$link,
+			description=>'Gallery Feed',
+			#language=>$language,
+			#rating=>$rating,
+			#copyright=>$copyright,
+			#pubDate=>$pubDate,
+			#lastBuildDate=>$lastBuild,
+			#docs=>$docs,
+			#managingEditor=>$editor,
+			#webMaster=>$webMaster
+		);
+		$rssobj->{'rss'}->save($rssobj->{'file'});
 	}
+	$self->{-rss} = $rssobj->{'rss'};
 }
 
 sub iterate {
@@ -466,7 +506,7 @@ sub makeaux {
 	my $dn = $self->{-parent}->{-fullpath};
 	my $pref = $self->{-previmg}->{-base};
 	my $nref = $self->{-nextimg}->{-base};
-	my $inc = $self->{-inc};
+	my $inc = $self->{-inc}.$incdir.'/';
 	my $title = $self->{-info}->{'Comment'};
 	$title = $name unless ($title);
 
@@ -586,7 +626,7 @@ sub startindex {
 	binmode($IND, ":utf8");
 	$self->{-IND} = $IND;
 
-	my $inc = $self->{-inc};
+	my $inc = $self->{-inc}.$incdir.'/';
 	my $title = $self->{-title};
 	my $rsslink="";
 	if ($self->{-rss}) {
@@ -642,7 +682,7 @@ sub endindex {
 
 	print $IND end_div;
 	my $EVL;
-	if (open($EVL,$self->{-inc}.'footer.pl')) {
+	if (open($EVL,$self->{-inc}.$incdir.'/footer.pl')) {
 		my $prm;
 		while (<$EVL>) {
 			$prm .= $_;
@@ -665,7 +705,8 @@ sub endindex {
 				$self->{-title},
 				$self->{-numofimgs},
 				$self->{-numofsubs};
-		my $rsslink=$rssobj->{'rss'}->channel('link')."index.html";
+		my $rsslink=$rssobj->{'rss'}->channel('link').
+			$self->{-relpath}."/index.html";
 		$rssobj->{'rss'}->add_item(
 			title		=> $self->{-title},
 			link		=> $rsslink,
