@@ -109,7 +109,7 @@ sub new {
 				-depth=>$parent->{-depth}+1,
 				-base=>$name,
 				-fullpath=>$parent->{-fullpath}.'/'.$name,
-				-relpath=>$parent->{-relpath}.'/'.$name,
+				-relpath=>$parent->{-relpath}.$name.'/',
 				-inc=>'../'.$parent->{-inc},
 			};
 	} else {
@@ -164,6 +164,7 @@ sub initpaths {
 		}
 		my $relpath = substr($fullpath,$pos);
 		$relpath =~ s%^/%%;
+		$relpath .= '/' if ($relpath);
 		$self->{-relpath} = $relpath;
 		$self->{-toppath} = substr($fullpath,0,$pos);
 		#print "rel=$relpath, top=$self->{-toppath}, inc=$inc\n";
@@ -179,7 +180,7 @@ sub initrss {
 	my $self=shift;		# this is not a method but we cheat
 	my $fullpath=$self->{-fullpath};
 	my $inc=$self->{-inc}.$incdir.'/';
-	my $conffile=$inc.'rss.conf';
+	my $conffile=$self->{-toppath}.'/'.$incdir.'/rss.conf';
 	my $CONF;
 
 	if ($rssfile) {
@@ -629,11 +630,11 @@ sub startindex {
 	my $inc = $self->{-inc}.$incdir.'/';
 	my $title = $self->{-title};
 	my $rsslink="";
-	if ($self->{-rss}) {
+	if ($rssobj) {
 		$rsslink=Link({-rel=>'alternate',
 				-type=>'application/rss+xml',
 				-title=>'RSS',
-				-href=>$self->{-rss}});
+				-href=>$self->{-inc}.$rssfile});
 	}
 	print $IND start_html(-title => $title,
 			-encoding=>"utf-8",
@@ -657,7 +658,7 @@ sub startindex {
 				-id => 'indexContainer'}),
 		"\n";
 	my $EVL;
-	if (open($EVL,$inc.'header.pl')) {
+	if (open($EVL,$self->{-toppath}.'/'.$incdir.'/header.pl')) {
 		my $prm;
 		while (<$EVL>) {
 			$prm .= $_;
@@ -682,7 +683,7 @@ sub endindex {
 
 	print $IND end_div;
 	my $EVL;
-	if (open($EVL,$self->{-inc}.$incdir.'/footer.pl')) {
+	if (open($EVL,$self->{-toppath}.'/'.$incdir.'/footer.pl')) {
 		my $prm;
 		while (<$EVL>) {
 			$prm .= $_;
@@ -706,7 +707,7 @@ sub endindex {
 				$self->{-numofimgs},
 				$self->{-numofsubs};
 		my $rsslink=$rssobj->{'rss'}->channel('link').
-			$self->{-relpath}."/index.html";
+			$self->{-relpath}."index.html";
 		$rssobj->{'rss'}->add_item(
 			title		=> $self->{-title},
 			link		=> $rsslink,
