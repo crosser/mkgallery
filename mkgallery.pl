@@ -681,6 +681,9 @@ sub startindex {
 		);
 		print $IND eval $prm,"\n";
 	} else {
+		print STDERR "could not open ",
+			$self->{-toppath}.'/'.$incdir.'/header.pl',
+			" ($!), reverting to default header";
 		print $IND a({-href=>"../index.html"},"UP"),"\n",
 			h1({-class=>'title'},$title),"\n",
 	}
@@ -705,6 +708,10 @@ sub endindex {
 			-breadcrumbs	=> "breadcrumbs unimplemented",
 		);
 		print $IND eval $prm,"\n";
+	} else {
+		print STDERR "could not open ",
+			$self->{-toppath}.'/'.$incdir.'/footer.pl',
+			" ($!), reverting to default empty footer";
 	}
 	print $IND end_html,"\n";
 
