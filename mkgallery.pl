@@ -29,6 +29,7 @@ package FsObj;
 use strict;
 use Carp;
 use POSIX qw/getcwd strftime/;
+use HTTP::Date;
 use CGI qw/:html *table *Tr *td *center *div *Link/;
 use Image::Info qw/image_info dim/;
 use Term::ReadLine;
@@ -179,8 +180,9 @@ sub initpaths {
 sub initrss {
 	my $self=shift;		# this is not a method but we cheat
 	my $fullpath=$self->{-fullpath};
+	my $toppath=$self->{-toppath};
 	my $inc=$self->{-inc}.$incdir.'/';
-	my $conffile=$self->{-toppath}.'/'.$incdir.'/rss.conf';
+	my $conffile=$toppath.'/'.$incdir.'/rss.conf';
 	my $CONF;
 
 	if ($rssfile) {
@@ -218,9 +220,16 @@ sub initrss {
 		}
 		$rssobj->{'rss'}->save($rssobj->{'file'});
 	} else {
-		my $link="";
-		for (my $pos=index($rssfile,'/');$pos>=0;
-					$pos=index($rssfile,'/',$pos+1)) {
+		my $link;
+		my $p1;
+		my $p2;
+		for ($p1=0,$p2=length($toppath);
+				substr($rssfile,$p1,3) eq '../' && $p2>0;
+				$p1+=3,$p2=rindex($toppath,'/',$p2-1)) {;}
+		$link=substr($toppath,$p2);
+		$link =~ s%^/%%;
+		$link .= '/' if ($link);
+		while (($p1=index($rssfile,'/',$p1+1)) >= 0) {
 			$link = '../'.$link;
 		}
 		
@@ -712,6 +721,7 @@ sub endindex {
 			title		=> $self->{-title},
 			link		=> $rsslink,
 			description	=> $rsstitle,
+			pubDate		=> time2str(time),
 		);
 	}
 }
