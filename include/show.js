@@ -284,7 +284,7 @@ var Show = new Class({
 	},
 
 	calcsize: function(cachel){
-		if (! cachel.id) {
+		if (! cachel.url) {
 			return {
 				position: 'absolute',
 				top: 0+'px',
