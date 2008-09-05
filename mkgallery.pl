@@ -117,7 +117,6 @@ sub new {
 		$class = $this;
 		my $root=shift;
 		$self = {
-				-depth=>0,
 				-root=>$root,
 				-fullpath=>$root,
 			};
@@ -159,6 +158,7 @@ sub initpaths {
 					$pos=index($inc,'/',$pos+1)) {
 			$dp++;
 		}
+		$self->{-depth} = $dp;
 		for ($pos=length($fullpath);$dp>0 && $pos>0;
 					$pos=rindex($fullpath,'/',$pos-1)) {
 			$dp--;
@@ -174,6 +174,7 @@ sub initpaths {
 		$self->{-inc} = 'NO-.INCLUDE-IN-PATH/';	# won't work anyway
 		$self->{-rss} = '';
 		$self->{-relpath} = '';
+		$self->{-depth} = 0;
 	}
 }
 
