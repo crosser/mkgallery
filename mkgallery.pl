@@ -599,6 +599,7 @@ sub makeaux {
 			warn "cannot open \"$fn\": $!";
 			return;
 		}
+		binmode($F, ":utf8");
 		my $imgsrc = sprintf("../.%s/%s",$sizes[0],$name);
 		print $F start_html(-title=>$title,
 				-encoding=>"utf-8",
