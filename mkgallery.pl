@@ -811,7 +811,7 @@ sub img_entry {
 						"?q=$la,$lo&ll=$la,$lo",
 				-title=>"$la,$lo",
 				-class=>'geoloc'},
-				div({-class=>'geoloc'},"G")),"\n";
+				div({-class=>'geoloc'},"")),"\n";
 	}
 	print $IND a({-href=>".html/$name-static.html",
 				-title=>$title,
