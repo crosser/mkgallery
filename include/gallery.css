@@ -292,3 +292,16 @@ table.picframe {
 	color: #FFF;
 	text-align: left;
 }
+
+div.slideimage {
+ position: relative;
+}
+
+div.geoloc {
+ position: absolute;
+ right: 0px;
+ top: 0px;
+ width: 14px;
+ height: 14px;
+ background: url(smallglobe.png) no-repeat;
+}

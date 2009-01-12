@@ -35,7 +35,7 @@ use Image::Info qw/image_info dim/;
 use Term::ReadLine;
 use Getopt::Long;
 use Encode;
-use encoding 'utf-8';
+#use encoding 'utf-8';
 binmode(STDOUT, ":utf8");
 
 my $haveimagick = eval { require Image::Magick; };
@@ -43,6 +43,9 @@ my $haveimagick = eval { require Image::Magick; };
 
 my $haverssxml = eval { require XML::RSS; };
 { package XML::RSS; }		# to make perl compiler happy
+
+my $havegeoloc = eval { require Image::ExifTool::Location; };
+{ package Image::ExifTool::Location; }	# to make perl compiler happy
 
 my @sizes = (160, 640, 1600);
 my $incdir = ".gallery2";
@@ -366,6 +369,16 @@ sub isimg {
 	my $self = shift;
 	my $fullpath = $self->{-fullpath};
 	return 0 unless ( -f $fullpath );
+
+	if ($havegeoloc) {
+		my $exif = new Image::ExifTool;
+		$exif->ExtractInfo($fullpath);
+		my ($la,$lo) = $exif->GetLocation();
+		if ($la && $lo) {
+			$self->{-geoloc} = [$la,$lo];
+		}
+	}
+
 	my $info = image_info($fullpath);
 	if (my $error = $info->{error}) {
 		if (($error !~ "Unrecognized file format") &&
@@ -785,20 +798,28 @@ sub img_entry {
 	$self->{-parent}->{-numofimgs}++;
 
 	print $IND a({-name=>$name}),"\n",
-		start_table({-class=>'slide'}),start_Tr,start_td,"\n",
-		div({-class=>'slidetitle'},
+		start_table({-class=>'slide'}),start_Tr,start_td,"\n";
+	print $IND div({-class=>'slidetitle'},
 			"\n ",a({-href=>".html/$name-info.html",
 				-title=>'Image Info: '.$name,
 				-class=>'infoBox'},
 				$title),"\n"),"\n",
-		div({-class=>'slideimage'},
-			"\n ",a({-href=>".html/$name-static.html",
+		start_div({-class=>'slideimage'});
+	if ($self->{-geoloc}) {
+		my ($la,$lo) = @{$self->{-geoloc}};
+		print $IND a({-href=>"http://maps.google.com/".
+						"?q=$la,$lo&ll=$la,$lo",
+				-title=>"$la,$lo",
+				-class=>'geoloc'},
+				div({-class=>'geoloc'},"G")),"\n";
+	}
+	print $IND a({-href=>".html/$name-static.html",
 				-title=>$title,
 				-class=>'showImage',
 				-rel=>'i'.$name},
 				img({-src=>$thumb,
 				     -class=>'thumbnail',
-				     -alt=>$title})),"\n"),"\n",
+				     -alt=>$title})),"\n",end_div,
 		start_div({-class=>'varimages',-id=>'i'.$name,-title=>$title}),"\n";
 	foreach my $sz(@sizes) {
 		my $src=$self->{$sz}->{'url'};
