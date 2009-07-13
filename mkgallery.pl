@@ -446,6 +446,7 @@ sub edittitle {
 	my $title;
 	my $T;
 	if (open($T,'<'.$fullpath.'/.title')) {
+		binmode($T, ":utf8");
 		$title = <$T>;
 		$title =~ s/[\r\n]*$//;
 		close($T);
