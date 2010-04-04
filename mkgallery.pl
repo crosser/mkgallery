@@ -41,8 +41,11 @@ binmode(STDOUT, ":utf8");
 my $haveimagick = eval { require Image::Magick; };
 { package Image::Magick; }	# to make perl compiler happy
 
-my $haverssxml = eval { require XML::RSS; };
+my $haverss = eval { require XML::RSS; };
 { package XML::RSS; }		# to make perl compiler happy
+
+my $haveatom = eval { require XML::Atom; };
+{ package XML::Atom; }		# to make perl compiler happy
 
 my $havegeoloc = eval { require Image::ExifTool::Location; };
 { package Image::ExifTool::Location; }	# to make perl compiler happy
@@ -57,7 +60,7 @@ my $rssobj;
 my $debug = 0;
 my $asktitle = 0;
 my $noasktitle = 0;
-my $rssfile = "";
+my $feed = "";
 
 charset("utf-8");
 
@@ -66,13 +69,13 @@ unless (GetOptions(
 		'incpath'=>\$incpath,
 		'asktitle'=>\$asktitle,
 		'noasktitle'=>\$noasktitle,
-		'rssfile=s'=>\$rssfile,
+		'feed=s'=>\$feed,
 		'debug'=>\$debug)) {
 	&help;
 }
 
-if ($rssfile && ! $haverssxml) {
-	print STDERR "You need to get XML::RSS from CPAN to use --rssfile\n";
+if ($feed && ! ($haverss || $haveatom)) {
+	print STDERR "You need to get XML::RSS and/or XML::Atom to use --feed\n";
 	exit 1;
 }
 
@@ -92,7 +95,7 @@ usage: $0 [options]
  --asktitle:    ask to edit album titles even if there are ".title" files
  --noasktitle:  don't ask to enter album titles even where ".title"
                 files are absent.  Use partial directory names as titles.
- --rssfile=...:	build RSS feed for newly added "albums", give name of rss file
+ --feed=...:	build RSS feed for newly added "albums", give name of rss file
 __END__
 
 	exit 1;
@@ -189,9 +192,9 @@ sub initrss {
 	my $conffile=$toppath.'/'.$incdir.'/rss.conf';
 	my $CONF;
 
-	if ($rssfile) {
+	if ($feed) {
 		if (open($CONF,">".$conffile)) {
-			print $CONF "file: ",$rssfile,"\n";
+			print $CONF "file: ",$feed,"\n";
 			close($CONF);
 		} else {
 			print STDERR "could not open $conffile: $!\n";
@@ -207,14 +210,14 @@ sub initrss {
 			$v =~ s/^\s*//;
 			$v =~ s/\s*$//;
 			if ($k eq 'file') {
-				$rssfile=$v;
+				$feed=$v;
 			}
 		}
 	}
 
-	return unless ($rssfile);
+	return unless ($feed);
 
-	$rssobj->{'file'} = $self->{-toppath}.'/'.$rssfile;
+	$rssobj->{'file'} = $self->{-toppath}.'/'.$feed;
 	$rssobj->{'rss'} = new XML::RSS (version=>'2.0');
 	if ( -f $rssobj->{'file'} ) {
 		$rssobj->{'rss'}->parsefile($rssobj->{'file'});
@@ -228,12 +231,12 @@ sub initrss {
 		my $p1;
 		my $p2;
 		for ($p1=0,$p2=length($toppath);
-				substr($rssfile,$p1,3) eq '../' && $p2>0;
+				substr($feed,$p1,3) eq '../' && $p2>0;
 				$p1+=3,$p2=rindex($toppath,'/',$p2-1)) {;}
 		$link=substr($toppath,$p2);
 		$link =~ s%^/%%;
 		$link .= '/' if ($link);
-		while (($p1=index($rssfile,'/',$p1+1)) >= 0) {
+		while (($p1=index($feed,'/',$p1+1)) >= 0) {
 			$link = '../'.$link;
 		}
 		
@@ -659,7 +662,7 @@ sub startindex {
 		$rsslink=Link({-rel=>'alternate',
 				-type=>'application/rss+xml',
 				-title=>'RSS',
-				-href=>$self->{-inc}.$rssfile});
+				-href=>$self->{-inc}.$feed});
 	}
 	print $IND start_html(-title => $title,
 			-encoding=>"utf-8",
