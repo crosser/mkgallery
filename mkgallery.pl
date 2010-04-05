@@ -89,7 +89,7 @@ sub help {
 	print STDERR <<__END__;
 usage: $0 [options]
  --help:        print help message and exit
- --incpath:     do not try to find .gallery2 diretory upstream, use
+ --incpath:     do not try to find .gallery2 directory upstream, use
                 specified path (absolute or relavive).  Use with causion.
  --debug:       print a lot of debugging info to stdout as you run
  --asktitle:    ask to edit album titles even if there are ".title" files
@@ -189,28 +189,22 @@ sub initrss {
 	my $fullpath=$self->{-fullpath};
 	my $toppath=$self->{-toppath};
 	my $inc=$self->{-inc}.$incdir.'/';
-	my $conffile=$toppath.'/'.$incdir.'/rss.conf';
+	my $conffile=$toppath.'/'.$incdir.'/feed.conf';
 	my $CONF;
 
-	if ($feed) {
-		if (open($CONF,">".$conffile)) {
-			print $CONF "file: ",$feed,"\n";
-			close($CONF);
+	if (! $incpath) {
+		if ($feed) {
+			if (open($CONF,">".$conffile)) {
+				print $CONF $feed,"\n";
+				close($CONF);
+			} else {
+				print STDERR "could not open $conffile: $!\n";
+			}
 		} else {
-			print STDERR "could not open $conffile: $!\n";
-		}
-	} else {
-		if (open($CONF,$conffile)) {
-			my $ln=<$CONF>;
-			close($CONF);
-			chop $ln;
-			my ($k,$v)=split(':', $ln);
-			$k =~ s/^\s*//;
-			$k =~ s/\s*$//;
-			$v =~ s/^\s*//;
-			$v =~ s/\s*$//;
-			if ($k eq 'file') {
-				$feed=$v;
+			if (open($CONF,$conffile)) {
+				$feed=<$CONF>;
+				close($CONF);
+				chop $feed;
 			}
 		}
 	}
