@@ -690,6 +690,7 @@ sub startindex {
 			-version	=> $version,
 			-depth		=> $self->{-depth},
 			-title		=> $title,
+			-path		=> $self->{-fullpath},
 			-breadcrumbs	=> "breadcrumbs unimplemented",
 		);
 		print $IND eval $prm,"\n";
