@@ -82,7 +82,7 @@ if ($feed && ! ($haverss || $haveatom)) {
 my $term = new Term::ReadLine "Edit Title";
 
 FsObj->new(getcwd)->iterate;
-if ($rssobj) { $rssobj->{'rss'}->save($rssobj->{'file'}); }
+if ($rssobj) { $rssobj->{-rss}->save($rssobj->{-savepath}); }
 
 sub help {
 
@@ -211,32 +211,26 @@ sub initrss {
 
 	return unless ($feed);
 
-	$rssobj->{'file'} = $self->{-toppath}.'/'.$feed;
-	$rssobj->{'rss'} = new XML::RSS (version=>'2.0');
-	if ( -f $rssobj->{'file'} ) {
-		$rssobj->{'rss'}->parsefile($rssobj->{'file'});
-		my $itemstodel = @{$rssobj->{'rss'}->{'items'}} - 15;
+	my ($feedfile, $feedbase, $feedhub) = split(',', $feed);
+	$feedbase .= '/' unless ($feedbase =~ /\/$/);
+	print "($feedfile, $feedbase, $feedhub)\n";
+
+	$rssobj->{-savepath} = $self->{-toppath}.'/'.$feedfile;
+	$rssobj->{-file} = $feedfile;
+	$rssobj->{-base} = $feedbase;
+	$rssobj->{-hub} = $feedhub;
+	$rssobj->{-rss} = new XML::RSS (version=>'2.0');
+	if ( -f $rssobj->{-file} ) {
+		$rssobj->{-rss}->parsefile($rssobj->{-file});
+		my $itemstodel = @{$rssobj->{-rss}->{'items'}} - 15;
 		while ($itemstodel-- > 0) {
-			pop(@{$rssobj->{'rss'}->{'items'}})
+			pop(@{$rssobj->{-rss}->{'items'}})
 		}
-		$rssobj->{'rss'}->save($rssobj->{'file'});
+		$rssobj->{-rss}->save($rssobj->{-savepath});
 	} else {
-		my $link;
-		my $p1;
-		my $p2;
-		for ($p1=0,$p2=length($toppath);
-				substr($feed,$p1,3) eq '../' && $p2>0;
-				$p1+=3,$p2=rindex($toppath,'/',$p2-1)) {;}
-		$link=substr($toppath,$p2);
-		$link =~ s%^/%%;
-		$link .= '/' if ($link);
-		while (($p1=index($feed,'/',$p1+1)) >= 0) {
-			$link = '../'.$link;
-		}
-		
-		$rssobj->{'rss'}->channel(
+		$rssobj->{-rss}->channel(
 			title=>'Gallery',
-			link=>$link,
+			link=>$feedbase,
 			description=>'Gallery Feed',
 			#language=>$language,
 			#rating=>$rating,
@@ -247,9 +241,9 @@ sub initrss {
 			#managingEditor=>$editor,
 			#webMaster=>$webMaster
 		);
-		$rssobj->{'rss'}->save($rssobj->{'file'});
+		$rssobj->{-rss}->save($rssobj->{-savepath});
 	}
-	$self->{-rss} = $rssobj->{'rss'};
+	$self->{-rss} = $rssobj->{-rss};
 }
 
 sub iterate {
@@ -655,8 +649,8 @@ sub startindex {
 	if ($rssobj) {
 		$rsslink=Link({-rel=>'alternate',
 				-type=>'application/rss+xml',
-				-title=>'RSS',
-				-href=>$self->{-inc}.$feed});
+				-title=>'Gallery Feed',
+				-href=>$rssobj->{-base}.$rssobj->{-file}});
 	}
 	print $IND start_html(-title => $title,
 			-encoding=>"utf-8",
@@ -736,9 +730,9 @@ sub endindex {
 				$self->{-title},
 				$self->{-numofimgs},
 				$self->{-numofsubs};
-		my $rsslink=$rssobj->{'rss'}->channel('link').
+		my $rsslink=$rssobj->{-rss}->channel('link').
 			$self->{-relpath}."index.html";
-		$rssobj->{'rss'}->add_item(
+		$rssobj->{-rss}->add_item(
 			title		=> $self->{-title},
 			link		=> $rsslink,
 			description	=> $rsstitle,
