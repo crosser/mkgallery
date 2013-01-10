@@ -356,7 +356,9 @@ sub edittitle {
 	my $self = shift;
 	my $fullpath = $self->{-fullpath};
 	my $title;
+	my $titleimage;
 	my $T;
+	my $TI;
 	if (open($T,'<'.$fullpath.'/.title')) {
 		binmode($T, ":utf8");
 		$title = <$T>;
@@ -379,6 +381,14 @@ sub edittitle {
 		$title=$self->{-relpath};
 	}
 	$self->{-title}=$title;
+	if (open($TI,'<'.$fullpath.'/.titleimage')) {
+		binmode($TI, ":utf8");
+		$titleimage = <$TI>;
+		$titleimage =~ s/[\r\n]*$//;
+		close($TI);
+		#print STDERR "found title image \"",$titleimage,"\"\n";
+		$self->{-titleimage}=$titleimage;
+	}
 	print "title in $fullpath is $title\n" if ($debug);
 }
 
@@ -566,6 +576,7 @@ sub startindex {
 
 	my $inc = $self->{-inc}.$incdir.'/';
 	my $title = $self->{-title};
+	my $titleimage = $self->{-titleimage};	
 	print $IND start_html(-title => $title,
 			-encoding=>"utf-8",
 			-style=>[
@@ -597,6 +608,7 @@ sub startindex {
 			-version	=> $version,
 			-depth		=> $self->{-depth},
 			-title		=> $title,
+			-titleimage	=> $titleimage,
 			-path		=> $self->{-fullpath},
 			-breadcrumbs	=> "breadcrumbs unimplemented",
 		);
@@ -605,8 +617,14 @@ sub startindex {
 		print STDERR "could not open ",
 			$self->{-toppath}.'/'.$incdir.'/header.pl',
 			" ($!), reverting to default header";
-		print $IND a({-href=>"../index.html"},"UP"),"\n",
-			h1({-class=>'title'},$title),"\n",
+		print $IND a({-href=>"../index.html"},"UP"),"\n";
+		if ($titleimage) {
+			print $IND img({-src=>$titleimage,
+					-class=>'titleimage',
+					-alt=>'Title Image'}),"\n";
+		}
+		print $IND h1({-class=>'title'},$title),
+			br({-clear=>'all'}),"\n";
 	}
 }
 
@@ -626,6 +644,7 @@ sub endindex {
 			-version	=> $version,
 			-depth		=> $self->{-depth},
 			-title		=> $self->{-title},
+			-titleimage	=> $self->{-titleimage},
 			-breadcrumbs	=> "breadcrumbs unimplemented",
 		);
 		print $IND eval $prm,"\n";
