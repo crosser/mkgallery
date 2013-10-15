@@ -48,9 +48,6 @@ command-line options:
  --asktitle:	ask to edit album titles even if there are ".title" files
  --noasktitle:	don't ask to enter album titles even where ".title"
 		files are absent.  Use partial directory names as titles.
- --rssfile:	partial name of rss file. Must be reachable from the
-		current directory or from one of upper directories.
-		First must be created with mkgalrss.pl script.
 
 The only way to specify titles for individual pictures is to write
 comments into the image files (in UTF-8 encoding).
@@ -71,9 +68,10 @@ Homepage:
 http://www.average.org/mkgallery/
 
 TODO:
+- support gestures. Make the interface more mobile-friendly
+- make jumping to adjacent albums possible (via parameter to upper index.html)
 - make index.html depend of .title and directory timestamps
 - rebuild htmls in .html when directory timestamp changes (images added)
-- make links in the rss file work
 - try to make showwin "Extending: Element" and get rid of domelement()
   dummy getter and getCoordinates() replacement function (?)
 
