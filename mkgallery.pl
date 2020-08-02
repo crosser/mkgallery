@@ -36,7 +36,7 @@ use Term::ReadLine;
 use Getopt::Long;
 use Encode;
 use UUID;
-#use encoding 'utf-8';
+use utf8;
 binmode(STDOUT, ":utf8");
 
 my $haveimagick = eval { require Image::Magick; };
@@ -67,6 +67,7 @@ unless (GetOptions(
 }
 
 my $term = new Term::ReadLine "Edit Title";
+binmode($term->IN, ':utf8');
 
 FsObj->new(getcwd)->iterate;
 
@@ -359,8 +360,7 @@ sub edittitle {
 	my $titleimage;
 	my $T;
 	my $TI;
-	if (open($T,'<'.$fullpath.'/.title')) {
-		binmode($T, ":utf8");
+	if (open($T,'<:encoding(utf8)', $fullpath.'/.title')) {
 		$title = <$T>;
 		$title =~ s/[\r\n]*$//;
 		close($T);
@@ -372,7 +372,7 @@ sub edittitle {
 		print $OUT "Enter title for $fullpath\n";
 		$title = $term->readline($prompt.' >',$title);
 		$term->addhistory($title) if ($title);
-		if (open($T,'>'.$fullpath.'/.title')) {
+		if (open($T,'>:encoding(utf8)', $fullpath.'/.title')) {
 			print $T $title,"\n";
 			close($T);
 		}
@@ -381,8 +381,7 @@ sub edittitle {
 		$title=$self->{-relpath};
 	}
 	$self->{-title}=$title;
-	if (open($TI,'<'.$fullpath.'/.titleimage')) {
-		binmode($TI, ":utf8");
+	if (open($TI,'<:encoding(utf8)', $fullpath.'/.titleimage')) {
 		$titleimage = <$TI>;
 		$titleimage =~ s/[\r\n]*$//;
 		close($TI);
@@ -486,11 +485,10 @@ sub makeaux {
 				$toggletext = 'Play-&gt;';
 			}
 			my $F;
-			unless (open($F,'>'.$fn)) {
+			unless (open($F,'>:encoding(utf8)', $fn)) {
 				warn "cannot open \"$fn\": $!";
 				next;
 			}
-			binmode($F, ":utf8");
 			if ($refresh eq 'slide') {
 				print $F start_html(
 					-encoding=>"utf-8",
@@ -531,11 +529,10 @@ sub makeaux {
 	my $fn = sprintf("%s/.html/%s-info.html",$dn,$name);
 	if (isnewer($self->{-fullpath},$fn)) {
 		my $F;
-		unless (open($F,'>'.$fn)) {
+		unless (open($F,'>:encoding(utf8)', $fn)) {
 			warn "cannot open \"$fn\": $!";
 			return;
 		}
-		binmode($F, ":utf8");
 		my $imgsrc = sprintf("../.%s/%s",$sizes[0],$name);
 		print $F start_html(-title=>$title,
 				-encoding=>"utf-8",
@@ -567,11 +564,10 @@ sub startindex {
 	my $block = $self->{-fullpath}.'/.noindex';
 	$fn = '/dev/null' if ( -f $block );
 	my $IND;
-	unless (open($IND,'>'.$fn)) {
+	unless (open($IND,'>:encoding(utf8)', $fn)) {
 		warn "cannot open $fn: $!";
 		return;
 	}
-	binmode($IND, ":utf8");
 	$self->{-IND} = $IND;
 
 	my $inc = $self->{-inc}.$incdir.'/';
@@ -598,7 +594,7 @@ sub startindex {
 				-id => 'indexContainer'}),
 		"\n";
 	my $EVL;
-	if (open($EVL,$self->{-toppath}.'/'.$incdir.'/header.pl')) {
+	if (open($EVL, '<:encoding(utf8)', $self->{-toppath}.'/'.$incdir.'/header.pl')) {
 		my $prm;
 		while (<$EVL>) {
 			$prm .= $_;
@@ -634,7 +630,7 @@ sub endindex {
 
 	print $IND end_div;
 	my $EVL;
-	if (open($EVL,$self->{-toppath}.'/'.$incdir.'/footer.pl')) {
+	if (open($EVL, '<:encoding(utf8)', $self->{-toppath}.'/'.$incdir.'/footer.pl')) {
 		my $prm;
 		while (<$EVL>) {
 			$prm .= $_;
